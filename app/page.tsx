@@ -32,6 +32,7 @@ export default function HomePage() {
           </p>
         </div>
 
+
         // ...
         <div className="mt-8 flex flex-wrap justify-center gap-4">
           <Link
