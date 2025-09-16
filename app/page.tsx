@@ -33,7 +33,6 @@ export default function HomePage() {
         </div>
 
 
-        // ...
         <div className="mt-8 flex flex-wrap justify-center gap-4">
           <Link
             href="/order"
@@ -53,29 +52,5 @@ export default function HomePage() {
 
       </div>
     </section>
-  );
-}
-
-/* ---------- tiny UI atoms (inline for simplicity) ---------- */
-function Feature({ title, desc }: { title: string; desc: string }) {
-  return (
-    <div className="group rounded-2xl border bg-white p-5 shadow-sm transition hover:shadow-md">
-      <div className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50">
-        <span className="text-sm text-blue-700">◆</span>
-      </div>
-      <div className="text-base font-semibold text-slate-900">{title}</div>
-      <p className="mt-1 text-sm leading-6 text-slate-600">{desc}</p>
-    </div>
-  );
-}
-
-function Stat({ title, value }: { title: string; value: string }) {
-  return (
-    <div className="flex items-center justify-between rounded-xl border p-4">
-      <div className="text-sm text-slate-600">{title}</div>
-      <div className="text-right text-lg font-semibold text-slate-900">
-        {value}
-      </div>
-    </div>
   );
 }
