@@ -7,7 +7,7 @@ export default function HomePage() {
   const router = useRouter()
 
   useEffect(() => {
-    // Нэвтрэх статусыг шалгах
+    // Нэвтрэх статусыг шалгах - Updated for deployment
     const isLoggedIn = localStorage.getItem('isLoggedIn')
     if (isLoggedIn === 'true') {
       router.push('/dashboard')
