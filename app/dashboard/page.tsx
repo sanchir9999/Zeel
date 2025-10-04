@@ -160,7 +160,7 @@ export default function DashboardPage() {
                     </div>
                 </div>
             </main>
-            
+
             {/* Footer */}
             <footer className="bg-gray-100 border-t">
                 <div className="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8">
