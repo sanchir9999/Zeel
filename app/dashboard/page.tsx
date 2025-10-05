@@ -90,7 +90,7 @@ export default function DashboardPage() {
             try {
                 const today = new Date().toISOString().split('T')[0] // YYYY-MM-DD format
                 const response = await fetch(`/api/orders/revenue?date=${today}`)
-                
+
                 if (response.ok) {
                     const data = await response.json()
                     dailyRevenue = data.revenue || 0

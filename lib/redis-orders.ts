@@ -36,16 +36,16 @@ export class OrderService {
 
             // Get existing orders
             const existingOrders = await this.getAll()
-            
+
             // Add new order
             existingOrders.push(order)
-            
+
             // Save back to Redis
             await redis.set(REDIS_KEYS.ORDERS, existingOrders)
-            
+
             // Also save individual order for quick access
             await redis.set(REDIS_KEYS.ORDER_BY_ID(order.id), order)
-            
+
             // Add to daily orders for analytics
             const today = new Date().toISOString().split('T')[0] // YYYY-MM-DD format
             const dailyOrders = await redis.get<Order[]>(REDIS_KEYS.DAILY_ORDERS(today)) || []
@@ -102,10 +102,10 @@ export class OrderService {
             const allOrders = await this.getAll()
             const filteredOrders = allOrders.filter(order => order.id !== id)
             await redis.set(REDIS_KEYS.ORDERS, filteredOrders)
-            
+
             // Remove individual order
             await redis.del(REDIS_KEYS.ORDER_BY_ID(id))
-            
+
             return true
         } catch (error) {
             console.error('Error deleting order from Redis:', error)

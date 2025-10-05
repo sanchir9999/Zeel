@@ -1,11 +1,14 @@
-import { kv } from '@vercel/kv'
+import { Redis } from '@upstash/redis'
 import { v4 as uuidv4 } from 'uuid'
-import { Product, Customer, Purchase } from './types'
+import { Product, Customer, Purchase, Order } from './types'
 
-// Check if KV is available (production environment)
-const isKVAvailable = (): boolean => {
+// Initialize Redis
+const redis = Redis.fromEnv()
+
+// Check if Redis is available (production environment)
+const isRedisAvailable = (): boolean => {
     try {
-        return !!process.env.KV_URL && !!process.env.KV_REST_API_URL && !!process.env.KV_REST_API_TOKEN
+        return !!process.env.KV_REST_API_URL && !!process.env.KV_REST_API_TOKEN
     } catch {
         return false
     }
@@ -15,7 +18,8 @@ const isKVAvailable = (): boolean => {
 const KEYS = {
     PRODUCTS: (storeId: string) => `products:${storeId}`,
     CUSTOMERS: 'customers',
-    PURCHASES: 'purchases'
+    PURCHASES: 'purchases',
+    ORDERS: 'orders'
 }
 
 // Helper functions for localStorage fallback
@@ -36,12 +40,12 @@ const setLocalStorage = (key: string, data: unknown) => {
 // Products CRUD
 export class ProductService {
     static async getAll(storeId: string): Promise<Product[]> {
-        if (isKVAvailable()) {
+        if (isRedisAvailable()) {
             try {
-                const products = await kv.get<Product[]>(KEYS.PRODUCTS(storeId))
+                const products = await redis.get<Product[]>(KEYS.PRODUCTS(storeId))
                 return products || []
             } catch (error) {
-                console.warn('KV failed, falling back to localStorage:', error)
+                console.warn('Redis failed, falling back to localStorage:', error)
             }
         }
 
@@ -55,14 +59,14 @@ export class ProductService {
             id: uuidv4()
         }
 
-        if (isKVAvailable()) {
+        if (isRedisAvailable()) {
             try {
                 const products = await this.getAll(storeId)
                 products.push(product)
-                await kv.set(KEYS.PRODUCTS(storeId), products)
+                await redis.set(KEYS.PRODUCTS(storeId), products)
                 return product
             } catch (error) {
-                console.warn('KV failed, falling back to localStorage:', error)
+                console.warn('Redis failed, falling back to localStorage:', error)
             }
         }
 
@@ -74,17 +78,17 @@ export class ProductService {
     }
 
     static async update(storeId: string, productId: string, updates: Partial<Product>): Promise<void> {
-        if (isKVAvailable()) {
+        if (isRedisAvailable()) {
             try {
                 const products = await this.getAll(storeId)
                 const index = products.findIndex(p => p.id === productId)
                 if (index !== -1) {
                     products[index] = { ...products[index], ...updates }
-                    await kv.set(KEYS.PRODUCTS(storeId), products)
+                    await redis.set(KEYS.PRODUCTS(storeId), products)
                     return
                 }
             } catch (error) {
-                console.warn('KV failed, falling back to localStorage:', error)
+                console.warn('Redis failed, falling back to localStorage:', error)
             }
         }
 
@@ -98,14 +102,14 @@ export class ProductService {
     }
 
     static async delete(storeId: string, productId: string): Promise<void> {
-        if (isKVAvailable()) {
+        if (isRedisAvailable()) {
             try {
                 const products = await this.getAll(storeId)
                 const filtered = products.filter(p => p.id !== productId)
-                await kv.set(KEYS.PRODUCTS(storeId), filtered)
+                await redis.set(KEYS.PRODUCTS(storeId), filtered)
                 return
             } catch (error) {
-                console.warn('KV failed, falling back to localStorage:', error)
+                console.warn('Redis failed, falling back to localStorage:', error)
             }
         }
 
@@ -119,12 +123,12 @@ export class ProductService {
 // Customers CRUD
 export class CustomerService {
     static async getAll(): Promise<Customer[]> {
-        if (isKVAvailable()) {
+        if (isRedisAvailable()) {
             try {
-                const customers = await kv.get<Customer[]>(KEYS.CUSTOMERS)
+                const customers = await redis.get<Customer[]>(KEYS.CUSTOMERS)
                 return customers || []
             } catch (error) {
-                console.warn('KV failed, falling back to localStorage:', error)
+                console.warn('Redis failed, falling back to localStorage:', error)
             }
         }
 
@@ -138,14 +142,14 @@ export class CustomerService {
             id: uuidv4()
         }
 
-        if (isKVAvailable()) {
+        if (isRedisAvailable()) {
             try {
                 const customers = await this.getAll()
                 customers.push(customer)
-                await kv.set(KEYS.CUSTOMERS, customers)
+                await redis.set(KEYS.CUSTOMERS, customers)
                 return customer
             } catch (error) {
-                console.warn('KV failed, falling back to localStorage:', error)
+                console.warn('Redis failed, falling back to localStorage:', error)
             }
         }
 
@@ -157,17 +161,17 @@ export class CustomerService {
     }
 
     static async update(customerId: string, updates: Partial<Customer>): Promise<void> {
-        if (isKVAvailable()) {
+        if (isRedisAvailable()) {
             try {
                 const customers = await this.getAll()
                 const index = customers.findIndex(c => c.id === customerId)
                 if (index !== -1) {
                     customers[index] = { ...customers[index], ...updates }
-                    await kv.set(KEYS.CUSTOMERS, customers)
+                    await redis.set(KEYS.CUSTOMERS, customers)
                     return
                 }
             } catch (error) {
-                console.warn('KV failed, falling back to localStorage:', error)
+                console.warn('Redis failed, falling back to localStorage:', error)
             }
         }
 
@@ -181,14 +185,14 @@ export class CustomerService {
     }
 
     static async delete(customerId: string): Promise<void> {
-        if (isKVAvailable()) {
+        if (isRedisAvailable()) {
             try {
                 const customers = await this.getAll()
                 const filtered = customers.filter(c => c.id !== customerId)
-                await kv.set(KEYS.CUSTOMERS, filtered)
+                await redis.set(KEYS.CUSTOMERS, filtered)
                 return
             } catch (error) {
-                console.warn('KV failed, falling back to localStorage:', error)
+                console.warn('Redis failed, falling back to localStorage:', error)
             }
         }
 
@@ -199,15 +203,91 @@ export class CustomerService {
     }
 }
 
+// Orders CRUD
+export class OrderService {
+    static async getAll(): Promise<Order[]> {
+        if (isRedisAvailable()) {
+            try {
+                const orders = await redis.get<Order[]>(KEYS.ORDERS)
+                return orders || []
+            } catch (error) {
+                console.warn('Redis failed, falling back to localStorage:', error)
+            }
+        }
+
+        // Fallback to localStorage (server-side returns empty)
+        if (typeof window !== 'undefined') {
+            return getLocalStorage('orders') || []
+        }
+
+        return []
+    }
+
+    static async add(orderData: Omit<Order, 'id'>): Promise<Order> {
+        const order: Order = {
+            ...orderData,
+            id: uuidv4()
+        }
+
+        if (isRedisAvailable()) {
+            try {
+                const orders = await this.getAll()
+                orders.push(order)
+                await redis.set(KEYS.ORDERS, orders)
+                return order
+            } catch (error) {
+                console.warn('Redis failed, falling back to localStorage:', error)
+            }
+        }
+
+        // Fallback to localStorage (client-side only)
+        if (typeof window !== 'undefined') {
+            const orders = getLocalStorage('orders') || []
+            orders.push(order)
+            setLocalStorage('orders', orders)
+        }
+
+        return order
+    }
+
+    static async getById(id: string): Promise<Order | null> {
+        const orders = await this.getAll()
+        return orders.find(order => order.id === id) || null
+    }
+
+    static async deleteById(id: string): Promise<boolean> {
+        if (isRedisAvailable()) {
+            try {
+                const orders = await this.getAll()
+                const filteredOrders = orders.filter(order => order.id !== id)
+                await redis.set(KEYS.ORDERS, filteredOrders)
+                return true
+            } catch (error) {
+                console.warn('Redis failed, falling back to localStorage:', error)
+            }
+        }
+
+        // Fallback to localStorage (client-side only)
+        if (typeof window !== 'undefined') {
+            const orders = getLocalStorage('orders') || []
+            const filteredOrders = orders.filter((order: Order) => order.id !== id)
+            setLocalStorage('orders', filteredOrders)
+            return true
+        }
+
+        return false
+    }
+}
+
 // Purchases CRUD
 export class PurchaseService {
     static async getAll(): Promise<Purchase[]> {
-        if (isKVAvailable()) {
+        if (isRedisAvailable()) {
             try {
-                const purchases = await kv.get<Purchase[]>(KEYS.PURCHASES)
+                const purchases = await redis.get<Purchase[]>(KEYS.PURCHASES)
                 return purchases || []
             } catch (error) {
-                console.warn('KV failed, falling back to localStorage:', error)
+                console.warn('Redis failed, falling back to localStorage:', error)
             }
         }
 
@@ -221,14 +301,14 @@ export class PurchaseService {
             id: uuidv4()
         }
 
-        if (isKVAvailable()) {
+        if (isRedisAvailable()) {
             try {
                 const purchases = await this.getAll()
                 purchases.push(purchase)
-                await kv.set(KEYS.PURCHASES, purchases)
+                await redis.set(KEYS.PURCHASES, purchases)
                 return purchase
             } catch (error) {
-                console.warn('KV failed, falling back to localStorage:', error)
+                console.warn('Redis failed, falling back to localStorage:', error)
             }
         }
 
@@ -240,14 +320,14 @@ export class PurchaseService {
     }
 
     static async delete(purchaseId: string): Promise<void> {
-        if (isKVAvailable()) {
+        if (isRedisAvailable()) {
             try {
                 const purchases = await this.getAll()
                 const filtered = purchases.filter(p => p.id !== purchaseId)
-                await kv.set(KEYS.PURCHASES, filtered)
+                await redis.set(KEYS.PURCHASES, filtered)
                 return
             } catch (error) {
-                console.warn('KV failed, falling back to localStorage:', error)
+                console.warn('Redis failed, falling back to localStorage:', error)
             }
         }
 
@@ -258,9 +338,10 @@ export class PurchaseService {
     }
 }
 
-// Auth Service
+// Auth service
 export class AuthService {
-    static async login(credentials: { username: string; password: string }): Promise<{ success: boolean; user?: string }> {
+    static async login(credentials: { username: string; password: string }): Promise<unknown> {
+        // Simulate login - in real app, verify credentials
         const validUsers = [
             { username: 'admin', password: 'admin123' },
             { username: 'manager', password: 'manager123' }

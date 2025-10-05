@@ -26,7 +26,7 @@ export default function OrderHistoryPage() {
         try {
             // Redis API-аас захиалгуудыг ачаалах
             const response = await fetch('/api/orders')
-            
+
             if (response.ok) {
                 const ordersList = await response.json()
                 // Огноогоор эрэмбэлэх (шинээс хуучин руу)
@@ -143,8 +143,8 @@ export default function OrderHistoryPage() {
                                             <div className="flex items-center space-x-2 mb-1">
                                                 <h3 className="text-lg font-semibold text-gray-900">{order.customerName}</h3>
                                                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${order.status === 'completed' ? 'bg-green-100 text-green-800' :
-                                                        order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                                                            'bg-red-100 text-red-800'
+                                                    order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                                                        'bg-red-100 text-red-800'
                                                     }`}>
                                                     {order.status === 'completed' ? 'Дууссан' :
                                                         order.status === 'pending' ? 'Хүлээгдэж буй' : 'Цуцлагдсан'}

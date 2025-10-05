@@ -5,7 +5,7 @@ export async function GET(request: NextRequest) {
     try {
         const { searchParams } = new URL(request.url)
         const date = searchParams.get('date') || new Date().toISOString().split('T')[0]
-        
+
         const revenue = await OrderService.getDailyRevenue(date)
         return NextResponse.json({ date, revenue })
     } catch (error) {

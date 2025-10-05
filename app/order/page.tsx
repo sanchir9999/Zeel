@@ -216,7 +216,7 @@ export default function OrderPage() {
 
                 const savedOrder = await response.json()
                 console.log('Захиалга Redis-д амжилттай хадгалагдлаа:', savedOrder.id)
-                
+
             } catch (apiError) {
                 console.error('API алдаа:', apiError)
                 alert('Захиалга хадгалахад алдаа гарлаа. Дахин оролдоно уу.')
