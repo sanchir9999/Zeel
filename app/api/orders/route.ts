@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { OrderService } from '@/lib/redis-orders'
+import { OrderService } from '@/lib/database'
 
 export async function GET() {
     try {
