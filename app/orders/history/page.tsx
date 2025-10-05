@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 import { Order } from '@/lib/types'
 
 export default function OrderHistoryPage() {
@@ -74,6 +73,127 @@ export default function OrderHistoryPage() {
         }
     }
 
+    // Захиалга хэвлэх (жижиг баримт хэвлэгчд зориулсан)
+    const printOrder = (order: Order) => {
+        const printWindow = window.open('', '_blank')
+        if (!printWindow) return
+
+        const { date, time } = formatDate(order.date)
+        const orderHtml = `
+            <html>
+            <head>
+                <title>Захиалга #${order.id.slice(-8)}</title>
+                <style>
+                    @media print {
+                        @page { 
+                            size: 58mm auto; 
+                            margin: 0; 
+                        }
+                    }
+                    body { 
+                        font-family: 'Courier New', monospace;
+                        font-size: 9px;
+                        line-height: 1.2;
+                        margin: 0;
+                        padding: 2mm;
+                        width: 54mm;
+                        color: #000;
+                    }
+                    .header { 
+                        text-align: center; 
+                        margin-bottom: 3px;
+                        border-bottom: 1px dashed #000;
+                        padding-bottom: 2px;
+                    }
+                    .shop-name {
+                        font-weight: bold;
+                        font-size: 10px;
+                    }
+                    .order-info { 
+                        margin: 3px 0;
+                        font-size: 8px;
+                    }
+                    .items {
+                        margin: 3px 0;
+                    }
+                    .item {
+                        margin: 1px 0;
+                        font-size: 8px;
+                    }
+                    .item-name {
+                        font-weight: bold;
+                    }
+                    .item-details {
+                        display: flex;
+                        justify-content: space-between;
+                    }
+                    .total-section {
+                        border-top: 1px dashed #000;
+                        margin-top: 3px;
+                        padding-top: 2px;
+                    }
+                    .total {
+                        font-weight: bold;
+                        font-size: 10px;
+                        text-align: center;
+                    }
+                    .footer {
+                        text-align: center;
+                        margin-top: 3px;
+                        font-size: 7px;
+                        border-top: 1px dashed #000;
+                        padding-top: 2px;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <div class="shop-name">Оюунгэрэл</div>
+                    <div>Захиалгын баримт</div>
+                </div>
+                
+                <div class="order-info">
+                    <div>Харилцагч: ${order.customerName}</div>
+                    <div>Огноо: ${date} ${time}</div>
+                    <div>Дугаар: #${order.id.slice(-8)}</div>
+                </div>
+
+                <div class="items">
+                    ${order.items.map((item, index) => `
+                        <div class="item">
+                            <div class="item-name">${item.productName}</div>
+                            <div class="item-details">
+                                <span>${item.quantity} x ${item.price.toLocaleString()}₮</span>
+                                <span>${item.total.toLocaleString()}₮</span>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <div class="total-section">
+                    <div class="total">
+                        НИЙТ ДҮН: ${order.totalAmount.toLocaleString()}₮
+                    </div>
+                </div>
+
+                <div class="footer">
+                    <div>Баярлалаа!</div>
+                    <div>Танд баярлалаа</div>
+                </div>
+            </body>
+            </html>
+        `
+
+        printWindow.document.write(orderHtml)
+        printWindow.document.close()
+
+        // Хэвлэх диалог автоматаар нээх
+        printWindow.onload = () => {
+            printWindow.print()
+            printWindow.close()
+        }
+    }
+
     if (!isLoggedIn) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -91,18 +211,7 @@ export default function OrderHistoryPage() {
             <div className="bg-white shadow-sm border-b">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center py-4">
-                        <div className="flex items-center space-x-4">
-                            <Link
-                                href="/dashboard"
-                                className="text-blue-600 hover:text-blue-800 flex items-center space-x-2"
-                            >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
-                                </svg>
-                                <span>Буцах</span>
-                            </Link>
-                            <h1 className="text-2xl font-bold text-gray-900">Захиалгын түүх</h1>
-                        </div>
+                        <h1 className="text-2xl font-bold text-gray-900">Захиалгын түүх</h1>
                         <div className="text-sm text-gray-500">
                             Нийт захиалга: {orders.length}
                         </div>
@@ -158,6 +267,15 @@ export default function OrderHistoryPage() {
                                             <div className="text-xl font-bold text-green-600 mt-1">
                                                 {order.totalAmount.toLocaleString()}₮
                                             </div>
+                                            <button
+                                                onClick={() => printOrder(order)}
+                                                className="mt-2 bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-lg text-xs font-medium transition-colors flex items-center space-x-1"
+                                            >
+                                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                                </svg>
+                                                <span>Хэвлэх</span>
+                                            </button>
                                         </div>
                                     </div>
 

@@ -129,12 +129,6 @@ export default function StorePage() {
             <header className="bg-white shadow">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-4 sm:py-6 space-y-3 sm:space-y-0">
-                        <div>
-                            <Link href="/dashboard" className="text-blue-600 hover:underline text-sm inline-block mb-2">
-                                ← Dashboard-руу буцах
-                            </Link>
-                            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{currentStore.name}</h1>
-                        </div>
                         <button
                             onClick={() => setShowAddForm(true)}
                             className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 sm:py-2 rounded-md text-sm font-medium transition-colors"

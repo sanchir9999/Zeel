@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
 
         // Get all orders
         const orders = await OrderService.getAll()
-        
+
         // Filter orders for the target date
         const dailyOrders = orders.filter(order => {
             const orderDate = new Date(order.date).toISOString().split('T')[0]
