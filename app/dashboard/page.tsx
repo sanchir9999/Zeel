@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Product } from '@/lib/types'
+import { Product, Order } from '@/lib/types'
 
 // Дэлгүүрийн мэдээлэл
 const stores = [
@@ -14,7 +14,7 @@ const stores = [
 
 interface TotalStats {
     totalProducts: number
-    totalValue: number
+    dailyRevenue: number
 }
 
 interface LowStockItem {
@@ -27,7 +27,7 @@ interface LowStockItem {
 export default function DashboardPage() {
     const [isLoggedIn, setIsLoggedIn] = useState(false)
     const [username, setUsername] = useState('')
-    const [totalStats, setTotalStats] = useState<TotalStats>({ totalProducts: 0, totalValue: 0 })
+    const [totalStats, setTotalStats] = useState<TotalStats>({ totalProducts: 0, dailyRevenue: 0 })
     const [lowStockItems, setLowStockItems] = useState<LowStockItem[]>([])
     const router = useRouter()
 
@@ -60,7 +60,6 @@ export default function DashboardPage() {
             const { DataClient } = await import('@/lib/api-client')
 
             let totalProductTypes = 0  // Барааны төрлийн тоо
-            let totalValue = 0
             const lowStock: LowStockItem[] = []
 
             // Бүх дэлгүүрийн мэдээлэл ачаалах
@@ -68,8 +67,6 @@ export default function DashboardPage() {
                 try {
                     const products = await DataClient.getProducts(store.id)
                     totalProductTypes += products.length  // Нийт барааны төрлийн тоо
-                    totalValue += products.reduce((sum: number, product: Product) =>
-                        sum + (product.quantity * product.price), 0)
 
                     // Low stock шалгах
                     products.forEach((product: Product) => {
@@ -88,7 +85,26 @@ export default function DashboardPage() {
                 }
             }
 
-            setTotalStats({ totalProducts: totalProductTypes, totalValue })
+            // Өнөөдрийн захиалгын орлого тооцох
+            let dailyRevenue = 0
+            try {
+                const existingOrders = localStorage.getItem('orders')
+                const orders = existingOrders ? JSON.parse(existingOrders) : []
+                
+                const today = new Date()
+                const todayStr = today.toDateString()
+                
+                dailyRevenue = orders
+                    .filter((order: Order) => {
+                        const orderDate = new Date(order.date)
+                        return orderDate.toDateString() === todayStr && order.status === 'completed'
+                    })
+                    .reduce((sum: number, order: Order) => sum + order.totalAmount, 0)
+            } catch (error) {
+                console.error('Error calculating daily revenue:', error)
+            }
+
+            setTotalStats({ totalProducts: totalProductTypes, dailyRevenue })
             setLowStockItems(lowStock)
         } catch (error) {
             console.error('Error loading total stats:', error)
@@ -151,8 +167,8 @@ export default function DashboardPage() {
                     </div>
                     <div className="bg-white rounded-2xl p-4 shadow-sm border-l-4 border-green-500">
                         <div className="text-center">
-                            <div className="text-lg font-bold text-green-600">{totalStats.totalValue.toLocaleString()}₮</div>
-                            <div className="text-xs text-gray-500">Нийт үнийн дүн</div>
+                            <div className="text-lg font-bold text-green-600">{totalStats.dailyRevenue.toLocaleString()}₮</div>
+                            <div className="text-xs text-gray-500">Өнөөдрийн орлого</div>
                         </div>
                     </div>
                 </div>
@@ -224,6 +240,20 @@ export default function DashboardPage() {
                             </div>
                         </Link>
 
+                        <Link href="/orders/history">
+                            <div className="bg-white rounded-2xl shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] p-6">
+                                <div className="text-center">
+                                    <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                        <span className="text-2xl">�</span>
+                                    </div>
+                                    <h3 className="font-semibold text-gray-800 mb-1">Захиалгын түүх</h3>
+                                    <p className="text-xs text-gray-500">Өмнөх захиалгууд</p>
+                                </div>
+                            </div>
+                        </Link>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
                         <Link href="/customers">
                             <div className="bg-white rounded-2xl shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] p-6">
                                 <div className="text-center">
@@ -235,9 +265,7 @@ export default function DashboardPage() {
                                 </div>
                             </div>
                         </Link>
-                    </div>
 
-                    <div className="grid grid-cols-1 gap-4">
                         <Link href="/reports">
                             <div className="bg-white rounded-2xl shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] p-6">
                                 <div className="text-center">

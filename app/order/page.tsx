@@ -141,8 +141,8 @@ export default function OrderPage() {
         return orderItems.reduce((sum, item) => sum + item.total, 0)
     }
 
-    // Захиалга хадгалах
-    const saveOrder = async () => {
+    // Захиалга баталгаажуулах
+    const confirmOrder = () => {
         if (!customerName.trim()) {
             alert('Харилцагчийн нэр оруулна уу')
             return
@@ -153,6 +153,18 @@ export default function OrderPage() {
             return
         }
 
+        // Confirmation dialog
+        const confirmed = window.confirm(
+            `Та захиалга баталгаажуулахдаа итгэлтэй байна уу?\n\nХарилцагч: ${customerName}\nНийт дүн: ${getTotalAmount().toLocaleString()}₮\nБарааны тоо: ${orderItems.length}`
+        )
+
+        if (confirmed) {
+            saveOrder()
+        }
+    }
+
+    // Захиалга хадгалах
+    const saveOrder = async () => {
         try {
             // Stock validation - Бараа хангалттай байгаа эсэхийг шалгах
             const { DataClient } = await import('@/lib/api-client')
@@ -203,7 +215,7 @@ export default function OrderPage() {
             }
 
             // Захиалга амжилттай хадгалагдсан
-            alert('Захиалга амжилттай хадгалагдлаа! Барааны тоо ширхэг шинэчлэгдлээ.')
+            alert('Захиалга амжилттай баталгаажлаа! Барааны тоо ширхэг шинэчлэгдлээ.')
             setCustomerName('')
             setOrderItems([])
             // Products-ийг дахин ачаалах
@@ -342,7 +354,7 @@ export default function OrderPage() {
                                     )}
                                     <div className="flex justify-between items-center">
                                         <span className="text-green-600 font-bold">{product.price.toLocaleString()}₮</span>
-                                        <span className="text-xs text-gray-500">Үлдэгдэл: {product.quantity}</span>
+                                        <span className="text-xs text-black">Үлдэгдэл: {product.quantity}</span>
                                     </div>
                                     <button
                                         onClick={() => addToOrder(product)}
@@ -438,10 +450,10 @@ export default function OrderPage() {
                                 {/* Товчууд */}
                                 <div className="space-y-2">
                                     <button
-                                        onClick={saveOrder}
+                                        onClick={confirmOrder}
                                         className="w-full bg-green-500 hover:bg-green-600 text-white py-3 px-4 rounded-xl font-medium transition-colors"
                                     >
-                                        Захиалга хадгалах
+                                        Захиалга баталгаажуулах
                                     </button>
                                     <button
                                         onClick={printOrder}
