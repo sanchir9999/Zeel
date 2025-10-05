@@ -277,6 +277,35 @@ export class OrderService {
 
         return false
     }
+
+    static async update(id: string, updateData: Partial<Order>): Promise<Order | null> {
+        if (isRedisAvailable()) {
+            try {
+                const orders = await this.getAll()
+                const index = orders.findIndex(order => order.id === id)
+                if (index !== -1) {
+                    orders[index] = { ...orders[index], ...updateData }
+                    await redis.set(KEYS.ORDERS, orders)
+                    return orders[index]
+                }
+            } catch (error) {
+                console.warn('Redis failed, falling back to localStorage:', error)
+            }
+        }
+
+        // Fallback to localStorage (client-side only)
+        if (typeof window !== 'undefined') {
+            const orders = getLocalStorage('orders') || []
+            const index = orders.findIndex((order: Order) => order.id === id)
+            if (index !== -1) {
+                orders[index] = { ...orders[index], ...updateData }
+                setLocalStorage('orders', orders)
+                return orders[index]
+            }
+        }
+
+        return null
+    }
 }
 
 // Purchases CRUD

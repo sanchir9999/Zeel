@@ -15,6 +15,10 @@ export default function OrderPage() {
     const [customers, setCustomers] = useState<Customer[]>([])
     const [orderItems, setOrderItems] = useState<OrderItem[]>([])
     const [showProductModal, setShowProductModal] = useState(false)
+    const [showPaymentModal, setShowPaymentModal] = useState(false)
+    const [paymentAmount, setPaymentAmount] = useState('')
+    const [paidAmount, setPaidAmount] = useState(0)
+    const [payments, setPayments] = useState<{ amount: number, date: string }[]>([])
 
     useEffect(() => {
         const loggedIn = localStorage.getItem('isLoggedIn')
@@ -144,7 +148,16 @@ export default function OrderPage() {
         )
 
         if (confirmed) {
-            saveOrder()
+            saveOrderAndRedirect()
+        }
+    }
+
+    // Захиалга хадгалаад захиалгын түүх хуудас руу шилжих
+    const saveOrderAndRedirect = async () => {
+        const success = await saveOrder()
+        if (success) {
+            // Захиалгын түүх хуудас руу шилжих
+            router.push('/orders/history')
         }
     }
 
@@ -161,12 +174,12 @@ export default function OrderPage() {
 
                 if (!product) {
                     alert(`Бараа олдсонгүй: ${item.productName}`)
-                    return
+                    return false
                 }
 
                 if (product.quantity < item.quantity) {
                     alert(`Хангалтгүй бараа: ${item.productName}. Байгаа: ${product.quantity}, Захиалсан: ${item.quantity}`)
-                    return
+                    return false
                 }
             }
 
@@ -177,7 +190,13 @@ export default function OrderPage() {
                 totalAmount: getTotalAmount(),
                 date: new Date().toISOString(),
                 storeId: 'main', // Үндсэн дэлгүүр
-                status: 'completed'
+                status: 'completed',
+                payment: {
+                    totalPaid: 0,
+                    remainingAmount: getTotalAmount(),
+                    paymentStatus: 'unpaid',
+                    payments: []
+                }
             }
 
             // API-ээр дамжуулан захиалга хадгалах (Redis database-д хадгалагдана)
@@ -191,7 +210,8 @@ export default function OrderPage() {
                         customerName: order.customerName,
                         items: order.items,
                         totalAmount: order.totalAmount,
-                        storeId: order.storeId
+                        storeId: order.storeId,
+                        payment: order.payment
                     })
                 })
 
@@ -205,7 +225,7 @@ export default function OrderPage() {
             } catch (apiError) {
                 console.error('API алдаа:', apiError)
                 alert('Захиалга хадгалахад алдаа гарлаа. Дахин оролдоно уу.')
-                return
+                return false
             }
 
             // Stock-аас автоматаар хасах
@@ -227,9 +247,11 @@ export default function OrderPage() {
             setOrderItems([])
             // Products-ийг дахин ачаалах
             loadAllProducts()
+            return true
         } catch (error) {
             console.error('Error saving order:', error)
             alert('Захиалга хадгалахад алдаа гарлаа')
+            return false
         }
     }
 
@@ -299,6 +321,46 @@ export default function OrderPage() {
         printWindow.document.write(orderHtml)
         printWindow.document.close()
         printWindow.print()
+    }
+
+    // Төлбөрийн функцууд
+    const openPaymentModal = () => {
+        setShowPaymentModal(true)
+    }
+
+    const addPayment = () => {
+        const amount = parseFloat(paymentAmount)
+        if (isNaN(amount) || amount <= 0) {
+            alert('Зөв дүн оруулна уу')
+            return
+        }
+
+        const totalAmount = getTotalAmount()
+        const remainingAmount = totalAmount - paidAmount
+
+        if (amount > remainingAmount) {
+            alert(`Үлдэгдэл төлбөр: ${remainingAmount.toLocaleString()}₮`)
+            return
+        }
+
+        const newPayment = {
+            amount: amount,
+            date: new Date().toLocaleString('mn-MN')
+        }
+
+        setPayments([...payments, newPayment])
+        setPaidAmount(paidAmount + amount)
+        setPaymentAmount('')
+    }
+
+    const getRemainingAmount = () => {
+        return getTotalAmount() - paidAmount
+    }
+
+    const resetPayments = () => {
+        setPayments([])
+        setPaidAmount(0)
+        setShowPaymentModal(false)
     }
 
     if (!isLoggedIn) {
@@ -400,7 +462,7 @@ export default function OrderPage() {
                                                 </svg>
                                             </button>
                                         </div>
-                                        <div className="flex justify-between items-center">
+                                        <div className="flex justif.3y-between items-center">
                                             <div className="flex items-center space-x-2">
                                                 <button
                                                     onClick={() => updateQuantity(item.productId, item.quantity - 1)}
@@ -445,12 +507,108 @@ export default function OrderPage() {
                                     >
                                         🖨️ Хэвлэх
                                     </button>
+                                    <button
+                                        onClick={openPaymentModal}
+                                        className="w-full bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white py-3 px-4 rounded-xl font-medium transition-all duration-150 ease-in-out hover:scale-105 active:scale-95 active:shadow-lg transform"
+                                    >
+                                        💰 Төлбөр
+                                    </button>
                                 </div>
                             </div>
                         )}
                     </div>
                 </div>
             </div>
+
+            {/* Төлбөрийн Modal */}
+            {showPaymentModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-xl font-bold text-black">💰 Төлбөрийн мэдээлэл</h2>
+                            <button
+                                onClick={() => setShowPaymentModal(false)}
+                                className="text-gray-500 hover:text-gray-700"
+                            >
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        {/* Нийт төлөх дүн */}
+                        <div className="bg-blue-50 rounded-lg p-4 mb-4">
+                            <div className="text-center">
+                                <p className="text-sm text-black mb-1">Нийт төлөх дүн</p>
+                                <p className="text-2xl font-bold text-blue-600">{getTotalAmount().toLocaleString()}₮</p>
+                            </div>
+                        </div>
+
+                        {/* Төлөгдсөн дүн болон үлдэгдэл */}
+                        <div className="grid grid-cols-2 gap-4 mb-4">
+                            <div className="bg-green-50 rounded-lg p-3 text-center">
+                                <p className="text-sm text-black mb-1">Төлөгдсөн</p>
+                                <p className="text-lg font-bold text-green-600">{paidAmount.toLocaleString()}₮</p>
+                            </div>
+                            <div className="bg-red-50 rounded-lg p-3 text-center">
+                                <p className="text-sm text-black mb-1">Үлдэгдэл</p>
+                                <p className="text-lg font-bold text-red-600">{getRemainingAmount().toLocaleString()}₮</p>
+                            </div>
+                        </div>
+
+                        {/* Төлбөр нэмэх */}
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-black mb-2">Төлөх дүн</label>
+                            <div className="flex space-x-2">
+                                <input
+                                    type="number"
+                                    value={paymentAmount}
+                                    onChange={(e) => setPaymentAmount(e.target.value)}
+                                    placeholder="Дүн оруулах..."
+                                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-black"
+                                />
+                                <button
+                                    onClick={addPayment}
+                                    className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                                >
+                                    Нэмэх
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Төлбөрийн түүх */}
+                        {payments.length > 0 && (
+                            <div className="mb-4">
+                                <h3 className="text-sm font-medium text-black mb-2">Төлбөрийн түүх</h3>
+                                <div className="space-y-2 max-h-32 overflow-y-auto">
+                                    {payments.map((payment, index) => (
+                                        <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                                            <span className="text-sm text-black">{payment.date}</span>
+                                            <span className="text-sm font-medium text-green-600">{payment.amount.toLocaleString()}₮</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Товчууд */}
+                        <div className="flex space-x-2">
+                            <button
+                                onClick={resetPayments}
+                                className="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded-lg font-medium transition-colors"
+                            >
+                                Цэвэрлэх
+                            </button>
+                            <button
+                                onClick={() => setShowPaymentModal(false)}
+                                className="flex-1 bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 rounded-lg font-medium transition-colors"
+                            >
+                                Хаах
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

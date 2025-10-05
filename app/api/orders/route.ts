@@ -45,6 +45,37 @@ export async function POST(request: NextRequest) {
     }
 }
 
+export async function PUT(request: NextRequest) {
+    try {
+        const body = await request.json()
+        const { id, ...updateData } = body
+
+        if (!id) {
+            return NextResponse.json(
+                { error: 'Order ID is required' },
+                { status: 400 }
+            )
+        }
+
+        const updatedOrder = await OrderService.update(id, updateData)
+
+        if (updatedOrder) {
+            return NextResponse.json(updatedOrder)
+        } else {
+            return NextResponse.json(
+                { error: 'Order not found' },
+                { status: 404 }
+            )
+        }
+    } catch (error) {
+        console.error('Error updating order:', error)
+        return NextResponse.json(
+            { error: 'Failed to update order' },
+            { status: 500 }
+        )
+    }
+}
+
 export async function DELETE(request: NextRequest) {
     try {
         const body = await request.json()

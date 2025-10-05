@@ -134,18 +134,22 @@ export default function DashboardPage() {
             <main className="p-4 space-y-6">
                 {/* Total Stats Cards */}
                 <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-white rounded-2xl p-4 shadow-sm border-l-4 border-blue-500">
-                        <div className="text-center">
-                            <div className="text-2xl font-bold text-blue-600">{totalStats.totalProducts}</div>
-                            <div className="text-xs text-gray-500">📦 Барааны төрөл</div>
+                    <Link href="/products">
+                        <div className="bg-white rounded-2xl p-4 shadow-sm border-l-4 border-blue-500 hover:shadow-lg transition-all duration-200 transform hover:scale-105 active:scale-95 cursor-pointer">
+                            <div className="text-center">
+                                <div className="text-2xl font-bold text-blue-600">{totalStats.totalProducts}</div>
+                                <div className="text-xs text-black">📦 Барааны төрөл</div>
+                            </div>
                         </div>
-                    </div>
-                    <div className="bg-white rounded-2xl p-4 shadow-sm border-l-4 border-green-500">
-                        <div className="text-center">
-                            <div className="text-lg font-bold text-green-600">{totalStats.dailyRevenue.toLocaleString()}₮</div>
-                            <div className="text-xs text-gray-500">Өнөөдрийн орлого</div>
+                    </Link>
+                    <Link href="/order">
+                        <div className="bg-white rounded-2xl p-4 shadow-sm border-l-4 border-green-500 hover:shadow-lg transition-all duration-200 transform hover:scale-105 active:scale-95 cursor-pointer">
+                            <div className="text-center">
+                                <div className="text-lg font-bold text-green-600">{totalStats.dailyRevenue.toLocaleString()}₮</div>
+                                <div className="text-xs text-black">Өнөөдрийн орлого</div>
+                            </div>
                         </div>
-                    </div>
+                    </Link>
                 </div>
 
                 {/* Stores Grid */}

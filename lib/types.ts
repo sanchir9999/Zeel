@@ -55,6 +55,20 @@ export interface Order {
     date: string
     storeId: string
     status: 'pending' | 'completed' | 'cancelled'
+    payment?: {
+        totalPaid: number
+        remainingAmount: number
+        paymentStatus: 'paid' | 'partial' | 'unpaid'
+        payments: PaymentRecord[]
+    }
+}
+
+export interface PaymentRecord {
+    id: string
+    amount: number
+    date: string
+    method: 'cash' | 'card' | 'transfer'
+    note?: string
 }
 
 export interface Purchase {

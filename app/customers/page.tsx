@@ -272,7 +272,7 @@ export default function CustomersPage() {
                                                 const orderDate = new Date(order.date)
                                                 const formattedDate = orderDate.toLocaleDateString('mn-MN')
                                                 const formattedTime = orderDate.toLocaleTimeString('mn-MN', { hour: '2-digit', minute: '2-digit' })
-                                                
+
                                                 return (
                                                     <div key={order.id} className="border rounded p-2 bg-gray-50">
                                                         <div className="flex justify-between items-start mb-1">
