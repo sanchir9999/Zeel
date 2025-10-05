@@ -10,21 +10,11 @@ export default function OrderPage() {
     const [products, setProducts] = useState<Product[]>([])
     const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
     const [searchTerm, setSearchTerm] = useState('')
-    const [selectedCategory, setSelectedCategory] = useState('all')
     const [customerName, setCustomerName] = useState('')
     const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
     const [customers, setCustomers] = useState<Customer[]>([])
     const [orderItems, setOrderItems] = useState<OrderItem[]>([])
     const [showProductModal, setShowProductModal] = useState(false)
-
-    // Категориуд
-    const categories = [
-        { id: 'all', name: 'Бүгд' },
-        { id: 'drinks', name: 'Ундаа' },
-        { id: 'food', name: 'Хоол' },
-        { id: 'dairy', name: 'Сүүн бүтээгдэхүүн' },
-        { id: 'personal', name: 'Хувийн хэрэгцээ' }
-    ]
 
     useEffect(() => {
         const loggedIn = localStorage.getItem('isLoggedIn')
@@ -73,14 +63,9 @@ export default function OrderPage() {
         }
     }
 
-    // Хайлт болон шүүлт
+    // Хайлт
     useEffect(() => {
         let filtered = products
-
-        // Категори шүүлт
-        if (selectedCategory !== 'all') {
-            filtered = filtered.filter(product => product.category === selectedCategory)
-        }
 
         // Текст хайлт
         if (searchTerm) {
@@ -92,7 +77,7 @@ export default function OrderPage() {
         }
 
         setFilteredProducts(filtered)
-    }, [searchTerm, selectedCategory, products])
+    }, [searchTerm, products])
 
     // Захиалгад бараа нэмэх
     const addToOrder = (product: Product, quantity: number = 1) => {
@@ -332,59 +317,36 @@ export default function OrderPage() {
             <div className="flex flex-col lg:flex-row h-screen">
                 {/* Барааны жагсаалт - зүүн талд */}
                 <div className="lg:w-2/3 p-4">
-                    {/* Хайлт болон шүүлт */}
+                    {/* Хайлтын талбар */}
                     <div className="bg-white rounded-2xl p-4 mb-4 shadow-sm">
-                        <div className="space-y-4">
-                            {/* Хайлтын талбар */}
-                            <input
-                                type="text"
-                                placeholder="Бараа хайх (нэр, брэнд, хэмжээ...)"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-black text-black"
-                            />
-
-                            {/* Категори шүүлт */}
-                            <div className="flex flex-wrap gap-2">
-                                {categories.map((category) => (
-                                    <button
-                                        key={category.id}
-                                        onClick={() => setSelectedCategory(category.id)}
-                                        className={`px-3 py-2 rounded-xl text-sm font-medium transition-colors ${selectedCategory === category.id
-                                            ? 'bg-blue-500 text-white'
-                                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                            }`}
-                                    >
-                                        {category.name}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
+                        <input
+                            type="text"
+                            placeholder="Бараа хайх (нэр, брэнд, хэмжээ...)"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-black text-black"
+                        />
                     </div>
 
                     {/* Барааны grid */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-96 overflow-y-auto">
                         {filteredProducts.map((product) => (
-                            <div key={product.id} className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
-                                <div className="space-y-2">
-                                    <h3 className="font-semibold text-gray-900 text-sm">{product.name}</h3>
-                                    {product.brand && (
-                                        <p className="text-xs text-gray-500">Брэнд: {product.brand}</p>
-                                    )}
-                                    {product.size && (
-                                        <p className="text-xs text-blue-600">Хэмжээ: {product.size}</p>
-                                    )}
+                            <div key={product.id} className="bg-white rounded-xl p-3 shadow-sm hover:shadow-md transition-shadow">
+                                <div className="space-y-1">
                                     <div className="flex justify-between items-center">
-                                        <span className="text-green-600 font-bold">{product.price.toLocaleString()}₮</span>
-                                        <span className="text-xs text-black">Үлдэгдэл: {product.quantity}</span>
+                                        <h3 className="font-semibold text-gray-900 text-sm truncate">{product.name}</h3>
+                                        <span className="text-green-600 font-bold text-sm">{product.price.toLocaleString()}₮</span>
                                     </div>
-                                    <button
-                                        onClick={() => addToOrder(product)}
-                                        disabled={product.quantity === 0}
-                                        className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors"
-                                    >
-                                        {product.quantity === 0 ? 'Дууссан' : 'Нэмэх'}
-                                    </button>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-xs text-black">Үлдэгдэл: {product.quantity}</span>
+                                        <button
+                                            onClick={() => addToOrder(product)}
+                                            disabled={product.quantity === 0}
+                                            className="bg-blue-500 hover:bg-blue-600 active:bg-blue-700 disabled:bg-gray-300 text-white py-1 px-3 rounded-lg text-xs font-medium transition-all duration-150 ease-in-out hover:scale-105 active:scale-95 active:shadow-lg transform disabled:transform-none disabled:scale-100"
+                                        >
+                                            {product.quantity === 0 ? 'Дууссан' : 'Нэмэх'}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         ))}
@@ -431,7 +393,7 @@ export default function OrderPage() {
                                             <h4 className="font-medium text-sm text-gray-900">{item.productName}</h4>
                                             <button
                                                 onClick={() => removeFromOrder(item.productId)}
-                                                className="text-red-500 hover:text-red-700"
+                                                className="text-red-500 hover:text-red-700 active:text-red-800 transition-all duration-150 ease-in-out hover:scale-110 active:scale-95 transform p-1 rounded-full hover:bg-red-50 active:bg-red-100"
                                             >
                                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -442,14 +404,14 @@ export default function OrderPage() {
                                             <div className="flex items-center space-x-2">
                                                 <button
                                                     onClick={() => updateQuantity(item.productId, item.quantity - 1)}
-                                                    className="w-6 h-6 bg-gray-200 rounded text-xs"
+                                                    className="w-6 h-6 bg-red-500 hover:bg-red-600 active:bg-red-700 text-white rounded text-xs font-bold transition-all duration-150 ease-in-out hover:scale-110 active:scale-95 active:shadow-inner transform"
                                                 >
                                                     -
                                                 </button>
-                                                <span className="text-sm">{item.quantity}</span>
+                                                <span className="text-sm text-black font-medium">{item.quantity}</span>
                                                 <button
                                                     onClick={() => updateQuantity(item.productId, item.quantity + 1)}
-                                                    className="w-6 h-6 bg-blue-500 text-white rounded text-xs"
+                                                    className="w-6 h-6 bg-red-500 hover:bg-red-600 active:bg-red-700 text-white rounded text-xs font-bold transition-all duration-150 ease-in-out hover:scale-110 active:scale-95 active:shadow-inner transform"
                                                 >
                                                     +
                                                 </button>
@@ -465,7 +427,7 @@ export default function OrderPage() {
                         {orderItems.length > 0 && (
                             <div className="border-t pt-4">
                                 <div className="flex justify-between items-center mb-4">
-                                    <span className="text-lg font-semibold">Нийт дүн:</span>
+                                    <span className="text-lg font-semibold text-black">Нийт дүн:</span>
                                     <span className="text-xl font-bold text-green-600">{getTotalAmount().toLocaleString()}₮</span>
                                 </div>
 
@@ -473,13 +435,13 @@ export default function OrderPage() {
                                 <div className="space-y-2">
                                     <button
                                         onClick={confirmOrder}
-                                        className="w-full bg-green-500 hover:bg-green-600 text-white py-3 px-4 rounded-xl font-medium transition-colors"
+                                        className="w-full bg-green-500 hover:bg-green-600 active:bg-green-700 text-white py-3 px-4 rounded-xl font-medium transition-all duration-150 ease-in-out hover:scale-105 active:scale-95 active:shadow-lg transform"
                                     >
                                         Захиалга баталгаажуулах
                                     </button>
                                     <button
                                         onClick={printOrder}
-                                        className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 px-4 rounded-xl font-medium transition-colors"
+                                        className="w-full bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white py-3 px-4 rounded-xl font-medium transition-all duration-150 ease-in-out hover:scale-105 active:scale-95 active:shadow-lg transform"
                                     >
                                         🖨️ Хэвлэх
                                     </button>
