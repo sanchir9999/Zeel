@@ -85,45 +85,21 @@ export default function DashboardPage() {
                 }
             }
 
-            // Өнөөдрийн захиалгын орлого тооцох (API-аас ачаалах)
+            // Өнөөдрийн захиалгын орлого тооцох (Redis API ашиглан)
             let dailyRevenue = 0
             try {
-                const response = await fetch('/api/orders')
-                let orders = []
-
+                const today = new Date().toISOString().split('T')[0] // YYYY-MM-DD format
+                const response = await fetch(`/api/orders/revenue?date=${today}`)
+                
                 if (response.ok) {
-                    orders = await response.json()
-                    console.log('Orders loaded for revenue calculation from API')
+                    const data = await response.json()
+                    dailyRevenue = data.revenue || 0
+                    console.log('Өнөөдрийн орлого Redis-аас ачаалагдлаа:', dailyRevenue)
                 } else {
-                    throw new Error('Failed to load orders from API')
+                    console.error('Failed to load daily revenue from Redis API')
                 }
-
-                const today = new Date()
-                const todayStr = today.toDateString()
-
-                dailyRevenue = orders
-                    .filter((order: Order) => {
-                        const orderDate = new Date(order.date)
-                        return orderDate.toDateString() === todayStr && order.status === 'completed'
-                    })
-                    .reduce((sum: number, order: Order) => sum + order.totalAmount, 0)
             } catch (error) {
-                console.warn('API failed for revenue calculation, falling back to localStorage:', error)
-                // Fallback: localStorage-аас тооцох
-                try {
-                    const existingOrders = localStorage.getItem('orders')
-                    const orders = existingOrders ? JSON.parse(existingOrders) : []
-                    const today = new Date()
-                    const todayStr = today.toDateString()
-                    dailyRevenue = orders
-                        .filter((order: Order) => {
-                            const orderDate = new Date(order.date)
-                            return orderDate.toDateString() === todayStr && order.status === 'completed'
-                        })
-                        .reduce((sum: number, order: Order) => sum + order.totalAmount, 0)
-                } catch (fallbackError) {
-                    console.error('Fallback revenue calculation also failed:', fallbackError)
-                }
+                console.error('Error fetching daily revenue from Redis:', error)
             }
 
             setTotalStats({ totalProducts: totalProductTypes, dailyRevenue })

@@ -24,37 +24,27 @@ export default function OrderHistoryPage() {
 
     const loadOrders = async () => {
         try {
-            // API-аас захиалгуудыг ачаалах (device хооронд sync хийгдэнэ)
+            // Redis API-аас захиалгуудыг ачаалах
             const response = await fetch('/api/orders')
-            let ordersList = []
-
-            if (response.ok) {
-                ordersList = await response.json()
-                console.log('Orders loaded successfully from API')
-            } else {
-                throw new Error('Failed to load from API')
-            }
             
-            // Огноогоор эрэмбэлэх (шинээс хуучин руу)
-            const sortedOrders = ordersList.sort((a: Order, b: Order) =>
-                new Date(b.date).getTime() - new Date(a.date).getTime()
-            )
-            setOrders(sortedOrders)
-            setFilteredOrders(sortedOrders)
-        } catch (error) {
-            console.warn('API failed, falling back to localStorage:', error)
-            // Fallback: localStorage-аас ачаалах
-            try {
-                const existingOrders = localStorage.getItem('orders')
-                const ordersList = existingOrders ? JSON.parse(existingOrders) : []
+            if (response.ok) {
+                const ordersList = await response.json()
+                // Огноогоор эрэмбэлэх (шинээс хуучин руу)
                 const sortedOrders = ordersList.sort((a: Order, b: Order) =>
                     new Date(b.date).getTime() - new Date(a.date).getTime()
                 )
                 setOrders(sortedOrders)
                 setFilteredOrders(sortedOrders)
-            } catch (fallbackError) {
-                console.error('Fallback also failed:', fallbackError)
+                console.log('Захиалгын түүх Redis-аас ачаалагдлаа:', ordersList.length)
+            } else {
+                console.error('Failed to load orders from Redis API')
+                setOrders([])
+                setFilteredOrders([])
             }
+        } catch (error) {
+            console.error('Error loading orders from Redis:', error)
+            setOrders([])
+            setFilteredOrders([])
         }
     }
 

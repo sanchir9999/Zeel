@@ -195,7 +195,7 @@ export default function OrderPage() {
                 status: 'completed'
             }
 
-            // API-ээр дамжуулан захиалга хадгалах (device хооронд sync хийгдэнэ)
+            // API-ээр дамжуулан захиалга хадгалах (Redis database-д хадгалагдана)
             try {
                 const response = await fetch('/api/orders', {
                     method: 'POST',
@@ -211,17 +211,16 @@ export default function OrderPage() {
                 })
 
                 if (!response.ok) {
-                    throw new Error('Failed to save order via API')
+                    throw new Error('API захиалга хадгалахад алдаа гарлаа')
                 }
+
+                const savedOrder = await response.json()
+                console.log('Захиалга Redis-д амжилттай хадгалагдлаа:', savedOrder.id)
                 
-                console.log('Order saved successfully via API')
             } catch (apiError) {
-                console.warn('API failed, falling back to localStorage:', apiError)
-                // Fallback: localStorage-д хадгалах
-                const existingOrders = localStorage.getItem('orders')
-                const orders = existingOrders ? JSON.parse(existingOrders) : []
-                orders.push(order)
-                localStorage.setItem('orders', JSON.stringify(orders))
+                console.error('API алдаа:', apiError)
+                alert('Захиалга хадгалахад алдаа гарлаа. Дахин оролдоно уу.')
+                return
             }
 
             // Stock-аас автоматаар хасах
