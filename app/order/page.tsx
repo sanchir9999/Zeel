@@ -143,9 +143,8 @@ export default function OrderPage() {
         }
 
         try {
-            const { DataClient } = await import('@/lib/api-client')
             const order: Order = {
-                id: Date.now().toString(),
+                id: `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
                 customerName: customerName.trim(),
                 items: orderItems,
                 totalAmount: getTotalAmount(),
@@ -154,7 +153,11 @@ export default function OrderPage() {
                 status: 'completed'
             }
 
-            await DataClient.addOrder(order)
+            // localStorage-д шууд хадгалах
+            const existingOrders = localStorage.getItem('orders')
+            const orders = existingOrders ? JSON.parse(existingOrders) : []
+            orders.push(order)
+            localStorage.setItem('orders', JSON.stringify(orders))
 
             // Захиалга амжилттай хадгалагдсан
             alert('Захиалга амжилттай хадгалагдлаа!')
@@ -287,8 +290,8 @@ export default function OrderPage() {
                                         key={category.id}
                                         onClick={() => setSelectedCategory(category.id)}
                                         className={`px-3 py-2 rounded-xl text-sm font-medium transition-colors ${selectedCategory === category.id
-                                                ? 'bg-blue-500 text-white'
-                                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                            ? 'bg-blue-500 text-white'
+                                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                             }`}
                                     >
                                         {category.name}
