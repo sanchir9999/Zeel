@@ -44,3 +44,34 @@ export async function POST(request: NextRequest) {
         )
     }
 }
+
+export async function DELETE(request: NextRequest) {
+    try {
+        const body = await request.json()
+        const { orderId } = body
+
+        if (!orderId) {
+            return NextResponse.json(
+                { error: 'Order ID is required' },
+                { status: 400 }
+            )
+        }
+
+        const success = await OrderService.deleteById(orderId)
+
+        if (success) {
+            return NextResponse.json({ message: 'Order deleted successfully' })
+        } else {
+            return NextResponse.json(
+                { error: 'Order not found' },
+                { status: 404 }
+            )
+        }
+    } catch (error) {
+        console.error('Error deleting order:', error)
+        return NextResponse.json(
+            { error: 'Failed to delete order' },
+            { status: 500 }
+        )
+    }
+}
