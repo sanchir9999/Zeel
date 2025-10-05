@@ -7,12 +7,12 @@ import { Product } from '@/lib/types'
 
 // Дэлгүүрийн мэдээлэл
 const stores = [
-    { id: 'mangas', name: 'Мангас агуулах', color: 'bg-blue-500' },
-    { id: 'main', name: 'Үндсэн дэлгүүр', color: 'bg-green-500' },
-    { id: 'warehouse255', name: '255 агуулах', color: 'bg-purple-500' }
+    { id: 'main', name: 'Үндсэн дэлгүүр', color: 'bg-gradient-to-r from-green-500 to-green-600', icon: '🏬' },
+    { id: 'mangas', name: 'Мангас агуулах', color: 'bg-gradient-to-r from-blue-500 to-blue-600', icon: '📦' },
+    { id: 'warehouse255', name: '255 агуулах', color: 'bg-gradient-to-r from-blue-500 to-blue-600', icon: '📦' }
 ]
 
-interface StoreStats {
+interface TotalStats {
     totalProducts: number
     totalValue: number
 }
@@ -20,7 +20,7 @@ interface StoreStats {
 export default function DashboardPage() {
     const [isLoggedIn, setIsLoggedIn] = useState(false)
     const [username, setUsername] = useState('')
-    const [storeData, setStoreData] = useState<Record<string, StoreStats>>({})
+    const [totalStats, setTotalStats] = useState<TotalStats>({ totalProducts: 0, totalValue: 0 })
     const router = useRouter()
 
     useEffect(() => {
@@ -31,40 +31,44 @@ export default function DashboardPage() {
         if (loggedIn === 'true' && user) {
             setIsLoggedIn(true)
             setUsername(user)
-            loadStoreData()
+
+            // Demo data нэмэх
+            const isDemoAdded = localStorage.getItem('demoProductsAdded')
+            if (!isDemoAdded) {
+                import('@/lib/demo-data').then(({ addDemoProducts }) => {
+                    addDemoProducts()
+                    localStorage.setItem('demoProductsAdded', 'true')
+                })
+            }
+
+            loadTotalStats()
         } else {
             router.push('/login')
         }
     }, [router])
 
-    const loadStoreData = async () => {
+    const loadTotalStats = async () => {
         try {
-            // Import DataClient dynamically to avoid SSR issues
             const { DataClient } = await import('@/lib/api-client')
 
-            const data: Record<string, StoreStats> = {}
+            let totalProducts = 0
+            let totalValue = 0
 
-            // Load data for each store using API/localStorage hybrid approach
+            // Бүх дэлгүүрийн мэдээлэл ачаалах
             for (const store of stores) {
                 try {
                     const products = await DataClient.getProducts(store.id)
-                    data[store.id] = {
-                        totalProducts: products.length,
-                        totalValue: products.reduce((sum: number, product: Product) => sum + (product.quantity * product.price), 0)
-                    }
+                    totalProducts += products.length
+                    totalValue += products.reduce((sum: number, product: Product) =>
+                        sum + (product.quantity * product.price), 0)
                 } catch (error) {
                     console.error(`Error loading data for store ${store.id}:`, error)
-                    // Fallback to empty data
-                    data[store.id] = {
-                        totalProducts: 0,
-                        totalValue: 0
-                    }
                 }
             }
 
-            setStoreData(data)
+            setTotalStats({ totalProducts, totalValue })
         } catch (error) {
-            console.error('Error loading store data:', error)
+            console.error('Error loading total stats:', error)
         }
     }
 
@@ -75,100 +79,134 @@ export default function DashboardPage() {
     }
 
     if (!isLoggedIn) {
-        return <div className="min-h-screen flex items-center justify-center">Ачааллаж байна...</div>
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+                    <h1 className="text-xl text-gray-600 mt-4">Ачааллаж байна...</h1>
+                </div>
+            </div>
+        )
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            {/* Header */}
-            <header className="bg-white shadow">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-4 sm:py-6 space-y-3 sm:space-y-0">
-                        <div className="text-center sm:text-left">
-                            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Дэлгүүрийн Касын Систем</h1>
-                            <p className="text-gray-600 text-sm sm:text-base">Тавтай морилно уу, {username}!</p>
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
+            {/* Mobile App Header */}
+            <header className="bg-white shadow-lg">
+                <div className="px-4 py-4">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                            <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+                                <span className="text-white font-bold text-lg">🏪</span>
+                            </div>
+                            <div>
+                                <h1 className="text-lg font-bold text-gray-900">Оюунгэрэл</h1>
+                                <p className="text-xs text-gray-500">Сайн байна уу, </p>
+                            </div>
                         </div>
                         <button
                             onClick={handleLogout}
-                            className="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                            className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transition-colors shadow-md"
                         >
-                            Гарах
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                            </svg>
                         </button>
                     </div>
                 </div>
             </header>
 
             {/* Main Content */}
-            <main className="max-w-7xl mx-auto py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
-                {/* Navigation Cards */}
-                <div className="space-y-4 sm:space-y-6">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+            <main className="p-4 space-y-6">
+                {/* Total Stats Cards */}
+                <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-white rounded-2xl p-4 shadow-sm border-l-4 border-blue-500">
+                        <div className="text-center">
+                            <div className="text-2xl font-bold text-blue-600">{totalStats.totalProducts}</div>
+                            <div className="text-xs text-gray-500">Нийт бараа</div>
+                        </div>
+                    </div>
+                    <div className="bg-white rounded-2xl p-4 shadow-sm border-l-4 border-green-500">
+                        <div className="text-center">
+                            <div className="text-lg font-bold text-green-600">{totalStats.totalValue.toLocaleString()}₮</div>
+                            <div className="text-xs text-gray-500">Нийт үнийн дүн</div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Stores Grid */}
+                <div className="space-y-4">
+                    <h2 className="text-lg font-semibold text-gray-800 px-2">🏪 Дэлгүүрүүд</h2>
+                    <div className="grid grid-cols-1 gap-4">
                         {stores.map((store) => (
                             <Link key={store.id} href={`/store/${store.id}`}>
-                                <div className="bg-white overflow-hidden shadow-md rounded-lg hover:shadow-lg transition-shadow cursor-pointer transform hover:scale-105 transition-transform duration-200">
-                                    <div className={`${store.color} px-4 py-4 sm:px-6 sm:py-5`}>
-                                        <h3 className="text-base sm:text-lg leading-6 font-medium text-white text-center sm:text-left">{store.name}</h3>
-                                    </div>
-                                    <div className="px-4 py-4 sm:px-6 sm:py-5">
-                                        <dl className="grid grid-cols-2 gap-4">
-                                            <div className="text-center sm:text-left">
-                                                <dt className="text-xs sm:text-sm font-medium text-gray-500">Барааны тоо</dt>
-                                                <dd className="mt-1 text-lg sm:text-xl font-semibold text-gray-900">{storeData[store.id]?.totalProducts || 0}</dd>
+                                <div className="bg-white rounded-2xl shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]">
+                                    <div className={`${store.color} p-6 rounded-2xl`}>
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center space-x-3">
+                                                <span className="text-3xl">{store.icon}</span>
+                                                <div>
+                                                    <h3 className="text-lg font-semibold text-white">{store.name}</h3>
+                                                </div>
                                             </div>
-                                            <div className="text-center sm:text-left">
-                                                <dt className="text-xs sm:text-sm font-medium text-gray-500">Нийт үнийн дүн</dt>
-                                                <dd className="mt-1 text-lg sm:text-xl font-semibold text-gray-900">{(storeData[store.id]?.totalValue || 0).toLocaleString()}₮</dd>
-                                            </div>
-                                        </dl>
+                                            <svg className="w-6 h-6 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                                            </svg>
+                                        </div>
                                     </div>
                                 </div>
                             </Link>
                         ))}
                     </div>
+                </div>
 
-                    {/* Quick Actions */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                        <Link href="/customers">
-                            <div className="bg-white overflow-hidden shadow-md rounded-lg hover:shadow-lg transition-shadow cursor-pointer">
-                                <div className="px-4 py-5 sm:px-6 text-center sm:text-left">
-                                    <div className="flex items-center justify-center sm:justify-start mb-3">
-                                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                                            <span className="text-blue-600 text-lg">👥</span>
-                                        </div>
-                                        <h3 className="ml-3 text-lg leading-6 font-medium text-gray-900 hidden sm:block">Харилцагчид</h3>
+                {/* Quick Actions */}
+                <div className="space-y-4">
+                    <h2 className="text-lg font-semibold text-gray-800 px-2">⚡ Хурдан хандалт</h2>
+                    <div className="grid grid-cols-2 gap-4">
+                        <Link href="/order">
+                            <div className="bg-white rounded-2xl shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] p-6">
+                                <div className="text-center">
+                                    <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                        <span className="text-2xl">🛒</span>
                                     </div>
-                                    <h3 className="text-lg leading-6 font-medium text-gray-900 mb-2 sm:hidden">Харилцагчид</h3>
-                                    <p className="text-sm text-gray-500">Харилцагчдын мэдээлэл болон худалдан авалтын түүх</p>
+                                    <h3 className="font-semibold text-gray-800 mb-1">Захиалга</h3>
+                                    <p className="text-xs text-gray-500">Шинэ захиалга үүсгэх</p>
                                 </div>
                             </div>
                         </Link>
 
-                        <Link href="/reports">
-                            <div className="bg-white overflow-hidden shadow-md rounded-lg hover:shadow-lg transition-shadow cursor-pointer">
-                                <div className="px-4 py-5 sm:px-6 text-center sm:text-left">
-                                    <div className="flex items-center justify-center sm:justify-start mb-3">
-                                        <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                                            <span className="text-green-600 text-lg">📊</span>
-                                        </div>
-                                        <h3 className="ml-3 text-lg leading-6 font-medium text-gray-900 hidden sm:block">Тайлан</h3>
+                        <Link href="/customers">
+                            <div className="bg-white rounded-2xl shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] p-6">
+                                <div className="text-center">
+                                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                        <span className="text-2xl">👥</span>
                                     </div>
-                                    <h3 className="text-lg leading-6 font-medium text-gray-900 mb-2 sm:hidden">Тайлан</h3>
-                                    <p className="text-sm text-gray-500">Борлуулалтын тайлан болон статистик</p>
+                                    <h3 className="font-semibold text-gray-800 mb-1">Харилцагчид</h3>
+                                    <p className="text-xs text-gray-500">Бүртгэл & түүх</p>
+                                </div>
+                            </div>
+                        </Link>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-4">
+                        <Link href="/reports">
+                            <div className="bg-white rounded-2xl shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] p-6">
+                                <div className="text-center">
+                                    <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                        <span className="text-2xl">📊</span>
+                                    </div>
+                                    <h3 className="font-semibold text-gray-800 mb-1">Тайлан</h3>
+                                    <p className="text-xs text-gray-500">Статистик & орлого</p>
                                 </div>
                             </div>
                         </Link>
                     </div>
                 </div>
-            </main>
 
-            {/* Footer */}
-            <footer className="bg-gray-100 border-t">
-                <div className="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8">
-                    <p className="text-center text-xs text-gray-500">
-                        Store Management System v2.0 - Updated {new Date().toLocaleDateString('mn-MN')}
-                    </p>
-                </div>
-            </footer>
+                {/* Bottom Spacing for mobile */}
+                <div className="h-6"></div>
+            </main>
         </div>
     )
 }

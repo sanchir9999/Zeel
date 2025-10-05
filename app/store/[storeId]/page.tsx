@@ -60,7 +60,9 @@ export default function StorePage() {
                     name: newProduct.name,
                     quantity: newProduct.quantity,
                     price: newProduct.price,
-                    addedDate: new Date().toLocaleDateString('mn-MN')
+                    addedDate: new Date().toLocaleDateString('mn-MN'),
+                    category: 'general',
+                    storeId,
                 })
 
                 // Reload products to get updated list

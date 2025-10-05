@@ -147,7 +147,7 @@ export default function CustomersPage() {
                                     placeholder="Нэр"
                                     value={newCustomer.name}
                                     onChange={(e) => setNewCustomer({ ...newCustomer, name: e.target.value })}
-                                    className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-500 text-gray-900"
                                     required
                                 />
                                 <input
@@ -155,7 +155,7 @@ export default function CustomersPage() {
                                     placeholder="Утасны дугаар"
                                     value={newCustomer.phone}
                                     onChange={(e) => setNewCustomer({ ...newCustomer, phone: e.target.value })}
-                                    className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-500 text-gray-900"
                                     required
                                 />
                                 <button

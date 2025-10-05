@@ -38,7 +38,9 @@ export async function POST(
             name,
             quantity: Number(quantity),
             price: Number(price),
-            addedDate: new Date().toLocaleDateString('mn-MN')
+            addedDate: new Date().toLocaleDateString('mn-MN'),
+            category: 'general',
+            storeId,
         })
 
         return NextResponse.json(product, { status: 201 })

@@ -4,7 +4,6 @@ import { Rubik, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
 import Navbar from "./components/Navbar";
-import Footer from "./components/Footer";
 
 const rubik = Rubik({
   subsets: ["latin", "cyrillic"],
@@ -16,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Зээлийн Апп",
-  description: "Зээлийн эрхийг бэлэн мөнгө болгон хувиргах үйлчилгээ",
+  title: "Дэлгүүрийн Касын Систем",
+  description: "Дэлгүүрийн кассын системийн тайлан",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -29,7 +28,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       >
         <Navbar />
         <main className="flex-1 bg-white">{children}</main>
-        <Footer />
       </body>
 
 
