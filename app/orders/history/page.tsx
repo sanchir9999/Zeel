@@ -24,8 +24,17 @@ export default function OrderHistoryPage() {
 
     const loadOrders = async () => {
         try {
-            const existingOrders = localStorage.getItem('orders')
-            const ordersList = existingOrders ? JSON.parse(existingOrders) : []
+            // API-аас захиалгуудыг ачаалах (device хооронд sync хийгдэнэ)
+            const response = await fetch('/api/orders')
+            let ordersList = []
+
+            if (response.ok) {
+                ordersList = await response.json()
+                console.log('Orders loaded successfully from API')
+            } else {
+                throw new Error('Failed to load from API')
+            }
+            
             // Огноогоор эрэмбэлэх (шинээс хуучин руу)
             const sortedOrders = ordersList.sort((a: Order, b: Order) =>
                 new Date(b.date).getTime() - new Date(a.date).getTime()
@@ -33,7 +42,19 @@ export default function OrderHistoryPage() {
             setOrders(sortedOrders)
             setFilteredOrders(sortedOrders)
         } catch (error) {
-            console.error('Error loading orders:', error)
+            console.warn('API failed, falling back to localStorage:', error)
+            // Fallback: localStorage-аас ачаалах
+            try {
+                const existingOrders = localStorage.getItem('orders')
+                const ordersList = existingOrders ? JSON.parse(existingOrders) : []
+                const sortedOrders = ordersList.sort((a: Order, b: Order) =>
+                    new Date(b.date).getTime() - new Date(a.date).getTime()
+                )
+                setOrders(sortedOrders)
+                setFilteredOrders(sortedOrders)
+            } catch (fallbackError) {
+                console.error('Fallback also failed:', fallbackError)
+            }
         }
     }
 

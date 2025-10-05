@@ -195,11 +195,34 @@ export default function OrderPage() {
                 status: 'completed'
             }
 
-            // localStorage-д шууд хадгалах
-            const existingOrders = localStorage.getItem('orders')
-            const orders = existingOrders ? JSON.parse(existingOrders) : []
-            orders.push(order)
-            localStorage.setItem('orders', JSON.stringify(orders))
+            // API-ээр дамжуулан захиалга хадгалах (device хооронд sync хийгдэнэ)
+            try {
+                const response = await fetch('/api/orders', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        customerName: order.customerName,
+                        items: order.items,
+                        totalAmount: order.totalAmount,
+                        storeId: order.storeId
+                    })
+                })
+
+                if (!response.ok) {
+                    throw new Error('Failed to save order via API')
+                }
+                
+                console.log('Order saved successfully via API')
+            } catch (apiError) {
+                console.warn('API failed, falling back to localStorage:', apiError)
+                // Fallback: localStorage-д хадгалах
+                const existingOrders = localStorage.getItem('orders')
+                const orders = existingOrders ? JSON.parse(existingOrders) : []
+                orders.push(order)
+                localStorage.setItem('orders', JSON.stringify(orders))
+            }
 
             // Stock-аас автоматаар хасах
             for (const item of orderItems) {

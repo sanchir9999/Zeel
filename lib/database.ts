@@ -1,6 +1,6 @@
 import { kv } from '@vercel/kv'
 import { v4 as uuidv4 } from 'uuid'
-import { Product, Customer, Purchase } from './types'
+import { Product, Customer, Purchase, Order } from './types'
 
 // Check if KV is available (production environment)
 const isKVAvailable = (): boolean => {
@@ -15,7 +15,8 @@ const isKVAvailable = (): boolean => {
 const KEYS = {
     PRODUCTS: (storeId: string) => `products:${storeId}`,
     CUSTOMERS: 'customers',
-    PURCHASES: 'purchases'
+    PURCHASES: 'purchases',
+    ORDERS: 'orders'
 }
 
 // Helper functions for localStorage fallback
@@ -255,6 +256,82 @@ export class PurchaseService {
         const purchases = getLocalStorage('purchases') || []
         const filtered = purchases.filter((p: Purchase) => p.id !== purchaseId)
         setLocalStorage('purchases', filtered)
+    }
+}
+
+// Orders CRUD
+export class OrderService {
+    static async getAll(): Promise<Order[]> {
+        if (isKVAvailable()) {
+            try {
+                const orders = await kv.get<Order[]>(KEYS.ORDERS)
+                return orders || []
+            } catch (error) {
+                console.warn('KV failed, falling back to localStorage:', error)
+            }
+        }
+
+        // Fallback to localStorage (browser only)
+        if (typeof window !== 'undefined') {
+            return getLocalStorage('orders') || []
+        }
+        
+        return []
+    }
+
+    static async add(orderData: Omit<Order, 'id'>): Promise<Order> {
+        const order: Order = {
+            ...orderData,
+            id: uuidv4()
+        }
+
+        if (isKVAvailable()) {
+            try {
+                const orders = await this.getAll()
+                orders.push(order)
+                await kv.set(KEYS.ORDERS, orders)
+                return order
+            } catch (error) {
+                console.warn('KV failed, falling back to localStorage:', error)
+            }
+        }
+
+        // Fallback to localStorage (browser only)
+        if (typeof window !== 'undefined') {
+            const orders = getLocalStorage('orders') || []
+            orders.push(order)
+            setLocalStorage('orders', orders)
+        }
+        
+        return order
+    }
+
+    static async getById(id: string): Promise<Order | null> {
+        const orders = await this.getAll()
+        return orders.find(order => order.id === id) || null
+    }
+
+    static async deleteById(id: string): Promise<boolean> {
+        if (isKVAvailable()) {
+            try {
+                const orders = await this.getAll()
+                const filteredOrders = orders.filter(order => order.id !== id)
+                await kv.set(KEYS.ORDERS, filteredOrders)
+                return true
+            } catch (error) {
+                console.warn('KV failed, falling back to localStorage:', error)
+            }
+        }
+
+        // Fallback to localStorage (browser only)
+        if (typeof window !== 'undefined') {
+            const orders = getLocalStorage('orders') || []
+            const filteredOrders = orders.filter((order: Order) => order.id !== id)
+            setLocalStorage('orders', filteredOrders)
+            return true
+        }
+        
+        return false
     }
 }
 

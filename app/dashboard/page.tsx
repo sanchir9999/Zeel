@@ -85,11 +85,18 @@ export default function DashboardPage() {
                 }
             }
 
-            // Өнөөдрийн захиалгын орлого тооцох
+            // Өнөөдрийн захиалгын орлого тооцох (API-аас ачаалах)
             let dailyRevenue = 0
             try {
-                const existingOrders = localStorage.getItem('orders')
-                const orders = existingOrders ? JSON.parse(existingOrders) : []
+                const response = await fetch('/api/orders')
+                let orders = []
+
+                if (response.ok) {
+                    orders = await response.json()
+                    console.log('Orders loaded for revenue calculation from API')
+                } else {
+                    throw new Error('Failed to load orders from API')
+                }
 
                 const today = new Date()
                 const todayStr = today.toDateString()
@@ -101,7 +108,22 @@ export default function DashboardPage() {
                     })
                     .reduce((sum: number, order: Order) => sum + order.totalAmount, 0)
             } catch (error) {
-                console.error('Error calculating daily revenue:', error)
+                console.warn('API failed for revenue calculation, falling back to localStorage:', error)
+                // Fallback: localStorage-аас тооцох
+                try {
+                    const existingOrders = localStorage.getItem('orders')
+                    const orders = existingOrders ? JSON.parse(existingOrders) : []
+                    const today = new Date()
+                    const todayStr = today.toDateString()
+                    dailyRevenue = orders
+                        .filter((order: Order) => {
+                            const orderDate = new Date(order.date)
+                            return orderDate.toDateString() === todayStr && order.status === 'completed'
+                        })
+                        .reduce((sum: number, order: Order) => sum + order.totalAmount, 0)
+                } catch (fallbackError) {
+                    console.error('Fallback revenue calculation also failed:', fallbackError)
+                }
             }
 
             setTotalStats({ totalProducts: totalProductTypes, dailyRevenue })
