@@ -27,7 +27,7 @@ export default function OrderHistoryPage() {
             const existingOrders = localStorage.getItem('orders')
             const ordersList = existingOrders ? JSON.parse(existingOrders) : []
             // Огноогоор эрэмбэлэх (шинээс хуучин руу)
-            const sortedOrders = ordersList.sort((a: Order, b: Order) => 
+            const sortedOrders = ordersList.sort((a: Order, b: Order) =>
                 new Date(b.date).getTime() - new Date(a.date).getTime()
             )
             setOrders(sortedOrders)
@@ -45,7 +45,7 @@ export default function OrderHistoryPage() {
             filtered = filtered.filter(order =>
                 order.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                order.items.some(item => 
+                order.items.some(item =>
                     item.productName.toLowerCase().includes(searchTerm.toLowerCase())
                 )
             )
@@ -81,7 +81,7 @@ export default function OrderHistoryPage() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center py-4">
                         <div className="flex items-center space-x-4">
-                            <Link 
+                            <Link
                                 href="/dashboard"
                                 className="text-blue-600 hover:text-blue-800 flex items-center space-x-2"
                             >
@@ -131,13 +131,12 @@ export default function OrderHistoryPage() {
                                         <div>
                                             <div className="flex items-center space-x-2 mb-1">
                                                 <h3 className="text-lg font-semibold text-gray-900">{order.customerName}</h3>
-                                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                                    order.status === 'completed' ? 'bg-green-100 text-green-800' :
-                                                    order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                                                    'bg-red-100 text-red-800'
-                                                }`}>
-                                                    {order.status === 'completed' ? 'Дууссан' : 
-                                                     order.status === 'pending' ? 'Хүлээгдэж буй' : 'Цуцлагдсан'}
+                                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${order.status === 'completed' ? 'bg-green-100 text-green-800' :
+                                                        order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                                                            'bg-red-100 text-red-800'
+                                                    }`}>
+                                                    {order.status === 'completed' ? 'Дууссан' :
+                                                        order.status === 'pending' ? 'Хүлээгдэж буй' : 'Цуцлагдсан'}
                                                 </span>
                                             </div>
                                             <p className="text-sm text-gray-500">Захиалгын дугаар: {order.id}</p>

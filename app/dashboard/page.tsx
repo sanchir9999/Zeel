@@ -90,10 +90,10 @@ export default function DashboardPage() {
             try {
                 const existingOrders = localStorage.getItem('orders')
                 const orders = existingOrders ? JSON.parse(existingOrders) : []
-                
+
                 const today = new Date()
                 const todayStr = today.toDateString()
-                
+
                 dailyRevenue = orders
                     .filter((order: Order) => {
                         const orderDate = new Date(order.date)
