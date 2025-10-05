@@ -23,7 +23,8 @@ export default function StorePage() {
     const [newProduct, setNewProduct] = useState({
         name: '',
         quantity: 0,
-        price: 0
+        price: 0,
+        category: 'general'
     })
 
     const currentStore = storeInfo[storeId]
@@ -61,14 +62,14 @@ export default function StorePage() {
                     quantity: newProduct.quantity,
                     price: newProduct.price,
                     addedDate: new Date().toLocaleDateString('mn-MN'),
-                    category: 'general',
+                    category: newProduct.category,
                     storeId,
                 })
 
                 // Reload products to get updated list
                 await loadProducts()
 
-                setNewProduct({ name: '', quantity: 0, price: 0 })
+                setNewProduct({ name: '', quantity: 0, price: 0, category: 'general' })
                 setShowAddForm(false)
             } catch (error) {
                 console.error('Error adding product:', error)
@@ -233,7 +234,7 @@ export default function StorePage() {
                                                     type="number"
                                                     value={product.quantity}
                                                     onChange={(e) => handleUpdateQuantity(product.id, parseInt(e.target.value) || 0)}
-                                                    className="w-full px-2 py-1 border border-gray-300 rounded text-center text-base"
+                                                    className="w-full px-2 py-1 border border-gray-300 rounded text-center text-base text-black"
                                                     min="0"
                                                 />
                                             </div>
@@ -297,7 +298,7 @@ export default function StorePage() {
                                                 type="number"
                                                 value={product.quantity}
                                                 onChange={(e) => handleUpdateQuantity(product.id, parseInt(e.target.value) || 0)}
-                                                className="w-20 px-2 py-1 border border-gray-300 rounded text-center"
+                                                className="w-20 px-2 py-1 border border-gray-300 rounded text-center text-black"
                                                 min="0"
                                             />
                                         </td>
@@ -355,7 +356,7 @@ export default function StorePage() {
                                             required
                                             value={newProduct.name}
                                             onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
-                                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+                                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-black placeholder-black"
                                             placeholder="Барааны нэрийг оруулна уу"
                                         />
                                     </div>
@@ -370,9 +371,26 @@ export default function StorePage() {
                                             min="1"
                                             value={newProduct.quantity}
                                             onChange={(e) => setNewProduct({ ...newProduct, quantity: parseInt(e.target.value) || 0 })}
-                                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+                                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-black placeholder-black"
                                             placeholder="0"
                                         />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Ангилал
+                                        </label>
+                                        <select
+                                            value={newProduct.category}
+                                            onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })}
+                                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-black"
+                                        >
+                                            <option value="general">Ерөнхий</option>
+                                            <option value="drinks">Ундаа</option>
+                                            <option value="food">Хоол</option>
+                                            <option value="dairy">Сүүн бүтээгдэхүүн</option>
+                                            <option value="personal">Хувийн хэрэгцээ</option>
+                                        </select>
                                     </div>
 
                                     <div>
@@ -385,7 +403,7 @@ export default function StorePage() {
                                             min="1"
                                             value={newProduct.price}
                                             onChange={(e) => setNewProduct({ ...newProduct, price: parseInt(e.target.value) || 0 })}
-                                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+                                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-black placeholder-black"
                                             placeholder="0"
                                         />
                                     </div>

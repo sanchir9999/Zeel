@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { Product, Order, OrderItem } from '@/lib/types'
+import { Product, Order, OrderItem, Customer } from '@/lib/types'
 
 export default function OrderPage() {
     const router = useRouter()
@@ -13,6 +12,8 @@ export default function OrderPage() {
     const [searchTerm, setSearchTerm] = useState('')
     const [selectedCategory, setSelectedCategory] = useState('all')
     const [customerName, setCustomerName] = useState('')
+    const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
+    const [customers, setCustomers] = useState<Customer[]>([])
     const [orderItems, setOrderItems] = useState<OrderItem[]>([])
     const [showProductModal, setShowProductModal] = useState(false)
 
@@ -21,9 +22,7 @@ export default function OrderPage() {
         { id: 'all', name: 'Бүгд' },
         { id: 'drinks', name: 'Ундаа' },
         { id: 'food', name: 'Хоол' },
-        { id: 'snacks', name: 'Зууш' },
         { id: 'dairy', name: 'Сүүн бүтээгдэхүүн' },
-        { id: 'cleaning', name: 'Цэвэрлэх хэрэгсэл' },
         { id: 'personal', name: 'Хувийн хэрэгцээ' }
     ]
 
@@ -32,6 +31,7 @@ export default function OrderPage() {
         if (loggedIn === 'true') {
             setIsLoggedIn(true)
             loadAllProducts()
+            loadCustomers()
         } else {
             router.push('/login')
         }
@@ -60,6 +60,16 @@ export default function OrderPage() {
             setFilteredProducts(allProducts)
         } catch (error) {
             console.error('Error loading products:', error)
+        }
+    }
+
+    const loadCustomers = async () => {
+        try {
+            const { DataClient } = await import('@/lib/api-client')
+            const customersList = await DataClient.getCustomers()
+            setCustomers(customersList)
+        } catch (error) {
+            console.error('Error loading customers:', error)
         }
     }
 
@@ -100,7 +110,8 @@ export default function OrderPage() {
                 productName: `${product.name}${product.size ? ` ${product.size}` : ''}${product.variant ? ` ${product.variant}` : ''}`,
                 quantity: quantity,
                 price: product.price,
-                total: quantity * product.price
+                total: quantity * product.price,
+                storeId: product.storeId
             }
             setOrderItems([...orderItems, newItem])
         }
@@ -143,6 +154,25 @@ export default function OrderPage() {
         }
 
         try {
+            // Stock validation - Бараа хангалттай байгаа эсэхийг шалгах
+            const { DataClient } = await import('@/lib/api-client')
+
+            for (const item of orderItems) {
+                // Тухайн бараанаас хангалттай quantity байгаа эсэхийг шалгах
+                const allProducts = await DataClient.getProducts(item.storeId || 'main')
+                const product = allProducts.find(p => p.id === item.productId)
+
+                if (!product) {
+                    alert(`Бараа олдсонгүй: ${item.productName}`)
+                    return
+                }
+
+                if (product.quantity < item.quantity) {
+                    alert(`Хангалтгүй бараа: ${item.productName}. Байгаа: ${product.quantity}, Захиалсан: ${item.quantity}`)
+                    return
+                }
+            }
+
             const order: Order = {
                 id: `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
                 customerName: customerName.trim(),
@@ -159,10 +189,25 @@ export default function OrderPage() {
             orders.push(order)
             localStorage.setItem('orders', JSON.stringify(orders))
 
+            // Stock-аас автоматаар хасах
+            for (const item of orderItems) {
+                const storeId = item.storeId || 'main'
+                const allProducts = await DataClient.getProducts(storeId)
+                const productIndex = allProducts.findIndex(p => p.id === item.productId)
+
+                if (productIndex !== -1) {
+                    allProducts[productIndex].quantity -= item.quantity
+                    allProducts[productIndex].lastUpdated = new Date().toISOString()
+                    localStorage.setItem(`products_${storeId}`, JSON.stringify(allProducts))
+                }
+            }
+
             // Захиалга амжилттай хадгалагдсан
-            alert('Захиалга амжилттай хадгалагдлаа!')
+            alert('Захиалга амжилттай хадгалагдлаа! Барааны тоо ширхэг шинэчлэгдлээ.')
             setCustomerName('')
             setOrderItems([])
+            // Products-ийг дахин ачаалах
+            loadAllProducts()
         } catch (error) {
             console.error('Error saving order:', error)
             alert('Захиалга хадгалахад алдаа гарлаа')
@@ -250,24 +295,6 @@ export default function OrderPage() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
-            {/* Header */}
-            <header className="bg-white shadow-sm border-b">
-                <div className="px-4 py-4">
-                    <div className="flex items-center justify-between">
-                        <Link href="/dashboard" className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors">
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
-                            </svg>
-                            <span className="text-sm font-medium">Буцах</span>
-                        </Link>
-
-                        <h1 className="text-lg font-semibold text-gray-900">🛒 Захиалга</h1>
-
-                        <div className="w-10"></div> {/* Spacer */}
-                    </div>
-                </div>
-            </header>
-
             <div className="flex flex-col lg:flex-row h-screen">
                 {/* Барааны жагсаалт - зүүн талд */}
                 <div className="lg:w-2/3 p-4">
@@ -280,7 +307,7 @@ export default function OrderPage() {
                                 placeholder="Бараа хайх (нэр, брэнд, хэмжээ...)"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-500 text-gray-900"
+                                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-black text-black"
                             />
 
                             {/* Категори шүүлт */}
@@ -336,13 +363,28 @@ export default function OrderPage() {
                         <h2 className="text-lg font-semibold text-gray-900">Захиалга</h2>
 
                         {/* Харилцагчийн нэр */}
-                        <input
-                            type="text"
-                            placeholder="Харилцагчийн нэр"
-                            value={customerName}
-                            onChange={(e) => setCustomerName(e.target.value)}
-                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-500 text-gray-900"
-                        />
+                        <select
+                            value={selectedCustomer?.id || ''}
+                            onChange={(e) => {
+                                const customerId = e.target.value
+                                if (customerId) {
+                                    const customer = customers.find(c => c.id === customerId)
+                                    setSelectedCustomer(customer || null)
+                                    setCustomerName(customer?.name || '')
+                                } else {
+                                    setSelectedCustomer(null)
+                                    setCustomerName('')
+                                }
+                            }}
+                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
+                        >
+                            <option value="">Харилцагч сонгох</option>
+                            {customers.map((customer) => (
+                                <option key={customer.id} value={customer.id}>
+                                    {customer.name} - {customer.phone}
+                                </option>
+                            ))}
+                        </select>
 
                         {/* Захиалгын жагсаалт */}
                         <div className="space-y-2 max-h-64 overflow-y-auto">

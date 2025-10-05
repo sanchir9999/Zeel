@@ -2,15 +2,22 @@
 export interface Product {
     id: string
     name: string
-    category: string // жишээ: "Ундаа", "Хоол", "Цэвэрлэх хэрэгсэл"
+    category: string // жишээ: "drinks", "food", "dairy", "personal", "cleaning"
     brand?: string // жишээ: "Coca Cola", "Pepsi"
     size?: string // жишээ: "0.5л", "1.5л", "2л"
     variant?: string // жишээ: "Улаан", "Цэнхэр", "Жижиг", "Том"
     barcode?: string // штрих код
+    sku?: string // Stock Keeping Unit
     quantity: number
     price: number
     costPrice?: number // өртөг
+    minStock?: number // доод хязгаар stock
+    maxStock?: number // дээд хязгаар stock
+    supplier?: string // нийлүүлэгч
+    expiryDate?: string // дуусах хугацаа
     addedDate: string
+    lastUpdated?: string // сүүлд шинэчилсэн огноо
+    isActive?: boolean // идэвхтэй эсэх
     storeId: string
 }
 
@@ -36,6 +43,7 @@ export interface OrderItem {
     quantity: number
     price: number
     total: number
+    storeId?: string // Аль дэлгүүрээс авсан
 }
 
 export interface Order {

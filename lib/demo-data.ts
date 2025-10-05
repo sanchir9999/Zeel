@@ -4,16 +4,16 @@ export const addDemoProducts = () => {
 
     // Мангас агуулах
     const mangasProducts = [
-        { id: '1', name: 'Coca Cola', category: 'drinks', brand: 'Coca Cola', size: '0.5л', quantity: 50, price: 1500, costPrice: 1200, addedDate: new Date().toISOString(), storeId: 'mangas' },
-        { id: '2', name: 'Coca Cola', category: 'drinks', brand: 'Coca Cola', size: '1.5л', quantity: 30, price: 3500, costPrice: 2800, addedDate: new Date().toISOString(), storeId: 'mangas' },
-        { id: '3', name: 'Coca Cola', category: 'drinks', brand: 'Coca Cola', size: '2л', quantity: 20, price: 4500, costPrice: 3600, addedDate: new Date().toISOString(), storeId: 'mangas' },
-        { id: '4', name: 'Pepsi', category: 'drinks', brand: 'Pepsi', size: '0.5л', quantity: 40, price: 1400, costPrice: 1100, addedDate: new Date().toISOString(), storeId: 'mangas' },
-        { id: '5', name: 'Pepsi', category: 'drinks', brand: 'Pepsi', size: '1.5л', quantity: 25, price: 3200, costPrice: 2500, addedDate: new Date().toISOString(), storeId: 'mangas' },
-        { id: '6', name: 'Sprite', category: 'drinks', brand: 'Coca Cola', size: '0.5л', quantity: 35, price: 1500, costPrice: 1200, addedDate: new Date().toISOString(), storeId: 'mangas' },
-        { id: '7', name: 'Fanta', category: 'drinks', brand: 'Coca Cola', size: '0.5л', quantity: 30, price: 1500, costPrice: 1200, addedDate: new Date().toISOString(), storeId: 'mangas' },
-        { id: '8', name: 'Усны лонх', category: 'drinks', brand: 'Монгол Ус', size: '0.5л', quantity: 100, price: 800, costPrice: 600, addedDate: new Date().toISOString(), storeId: 'mangas' },
-        { id: '9', name: 'Пиво', category: 'drinks', brand: 'Чингис', size: '0.5л', quantity: 60, price: 4500, costPrice: 3500, addedDate: new Date().toISOString(), storeId: 'mangas' },
-        { id: '10', name: 'Айраг', category: 'drinks', brand: 'Монгол Айраг', size: '1л', quantity: 15, price: 8000, costPrice: 6000, addedDate: new Date().toISOString(), storeId: 'mangas' }
+        { id: '1', name: 'Coca Cola', category: 'drinks', brand: 'Coca Cola', size: '0.5л', sku: 'COKE-05', quantity: 50, price: 1500, costPrice: 1200, minStock: 10, supplier: 'Coca Cola Mongolia', addedDate: new Date().toISOString(), lastUpdated: new Date().toISOString(), isActive: true, storeId: 'mangas' },
+        { id: '2', name: 'Coca Cola', category: 'drinks', brand: 'Coca Cola', size: '1.5л', sku: 'COKE-15', quantity: 30, price: 3500, costPrice: 2800, minStock: 5, supplier: 'Coca Cola Mongolia', addedDate: new Date().toISOString(), lastUpdated: new Date().toISOString(), isActive: true, storeId: 'mangas' },
+        { id: '3', name: 'Coca Cola', category: 'drinks', brand: 'Coca Cola', size: '2л', sku: 'COKE-20', quantity: 20, price: 4500, costPrice: 3600, minStock: 5, supplier: 'Coca Cola Mongolia', addedDate: new Date().toISOString(), lastUpdated: new Date().toISOString(), isActive: true, storeId: 'mangas' },
+        { id: '4', name: 'Pepsi', category: 'drinks', brand: 'Pepsi', size: '0.5л', sku: 'PEPSI-05', quantity: 40, price: 1400, costPrice: 1100, minStock: 10, supplier: 'Pepsi Mongolia', addedDate: new Date().toISOString(), lastUpdated: new Date().toISOString(), isActive: true, storeId: 'mangas' },
+        { id: '5', name: 'Pepsi', category: 'drinks', brand: 'Pepsi', size: '1.5л', sku: 'PEPSI-15', quantity: 25, price: 3200, costPrice: 2500, minStock: 5, supplier: 'Pepsi Mongolia', addedDate: new Date().toISOString(), lastUpdated: new Date().toISOString(), isActive: true, storeId: 'mangas' },
+        { id: '6', name: 'Sprite', category: 'drinks', brand: 'Coca Cola', size: '0.5л', sku: 'SPRITE-05', quantity: 35, price: 1500, costPrice: 1200, minStock: 10, supplier: 'Coca Cola Mongolia', addedDate: new Date().toISOString(), lastUpdated: new Date().toISOString(), isActive: true, storeId: 'mangas' },
+        { id: '7', name: 'Fanta', category: 'drinks', brand: 'Coca Cola', size: '0.5л', sku: 'FANTA-05', quantity: 30, price: 1500, costPrice: 1200, minStock: 10, supplier: 'Coca Cola Mongolia', addedDate: new Date().toISOString(), lastUpdated: new Date().toISOString(), isActive: true, storeId: 'mangas' },
+        { id: '8', name: 'Усны лонх', category: 'drinks', brand: 'Монгол Ус', size: '0.5л', sku: 'WATER-05', quantity: 100, price: 800, costPrice: 600, minStock: 20, supplier: 'Монгол Ус ХХК', addedDate: new Date().toISOString(), lastUpdated: new Date().toISOString(), isActive: true, storeId: 'mangas' },
+        { id: '9', name: 'Пиво', category: 'drinks', brand: 'Чингис', size: '0.5л', sku: 'BEER-05', quantity: 60, price: 4500, costPrice: 3500, minStock: 15, supplier: 'Чингис Пиво', addedDate: new Date().toISOString(), lastUpdated: new Date().toISOString(), isActive: true, storeId: 'mangas' },
+        { id: '10', name: 'Айраг', category: 'drinks', brand: 'Монгол Айраг', size: '1л', sku: 'AIRAG-10', quantity: 15, price: 8000, costPrice: 6000, minStock: 5, supplier: 'Традицийн Айраг ХХК', expiryDate: '2025-12-31', addedDate: new Date().toISOString(), lastUpdated: new Date().toISOString(), isActive: true, storeId: 'mangas' }
     ]
 
     // Үндсэн дэлгүүр

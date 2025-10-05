@@ -16,6 +16,17 @@ export default function Navbar() {
         setIsMobileMenuOpen(false)
     }, [pathname])
 
+    // Page title-ийг URL-аас тодорхойлох
+    const getPageTitle = () => {
+        if (pathname === '/order') return '🛒 Захиалга'
+        if (pathname === '/customers') return '👥 Харилцагчид'
+        if (pathname.includes('/store/main')) return '🏪 Үндсэн дэлгүүр'
+        if (pathname.includes('/store/mangas')) return '🏭 Мангас агуулах'
+        if (pathname.includes('/store/warehouse255')) return '📦 255 агуулах'
+        if (pathname.includes('/store/')) return '🏪 Дэлгүүр'
+        return '🏪 Store POS'
+    }
+
     const handleLogout = () => {
         localStorage.removeItem('isLoggedIn')
         localStorage.removeItem('username')
@@ -48,9 +59,7 @@ export default function Navbar() {
 
                         {/* Page Title */}
                         <h1 className="text-lg font-semibold text-gray-900 text-center flex-1">
-                            {pathname.includes('/store/') ? 'Дэлгүүр' :
-                                pathname === '/customers' ? 'Харилцагчид' :
-                                    pathname === '/reports' ? 'Тайлан' : 'Store POS'}
+                            {getPageTitle()}
                         </h1>
 
                         {/* Menu Button */}

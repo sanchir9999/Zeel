@@ -17,10 +17,18 @@ interface TotalStats {
     totalValue: number
 }
 
+interface LowStockItem {
+    name: string
+    quantity: number
+    minStock: number
+    storeId: string
+}
+
 export default function DashboardPage() {
     const [isLoggedIn, setIsLoggedIn] = useState(false)
     const [username, setUsername] = useState('')
     const [totalStats, setTotalStats] = useState<TotalStats>({ totalProducts: 0, totalValue: 0 })
+    const [lowStockItems, setLowStockItems] = useState<LowStockItem[]>([])
     const router = useRouter()
 
     useEffect(() => {
@@ -51,22 +59,37 @@ export default function DashboardPage() {
         try {
             const { DataClient } = await import('@/lib/api-client')
 
-            let totalProducts = 0
+            let totalProductTypes = 0  // Барааны төрлийн тоо
             let totalValue = 0
+            const lowStock: LowStockItem[] = []
 
             // Бүх дэлгүүрийн мэдээлэл ачаалах
             for (const store of stores) {
                 try {
                     const products = await DataClient.getProducts(store.id)
-                    totalProducts += products.length
+                    totalProductTypes += products.length  // Нийт барааны төрлийн тоо
                     totalValue += products.reduce((sum: number, product: Product) =>
                         sum + (product.quantity * product.price), 0)
+
+                    // Low stock шалгах
+                    products.forEach((product: Product) => {
+                        const minStock = product.minStock || 5 // Default минималь stock
+                        if (product.quantity <= minStock) {
+                            lowStock.push({
+                                name: product.name,
+                                quantity: product.quantity,
+                                minStock: minStock,
+                                storeId: store.id
+                            })
+                        }
+                    })
                 } catch (error) {
                     console.error(`Error loading data for store ${store.id}:`, error)
                 }
             }
 
-            setTotalStats({ totalProducts, totalValue })
+            setTotalStats({ totalProducts: totalProductTypes, totalValue })
+            setLowStockItems(lowStock)
         } catch (error) {
             console.error('Error loading total stats:', error)
         }
@@ -123,7 +146,7 @@ export default function DashboardPage() {
                     <div className="bg-white rounded-2xl p-4 shadow-sm border-l-4 border-blue-500">
                         <div className="text-center">
                             <div className="text-2xl font-bold text-blue-600">{totalStats.totalProducts}</div>
-                            <div className="text-xs text-gray-500">Нийт бараа</div>
+                            <div className="text-xs text-gray-500">📦 Барааны төрөл</div>
                         </div>
                     </div>
                     <div className="bg-white rounded-2xl p-4 shadow-sm border-l-4 border-green-500">
@@ -133,6 +156,31 @@ export default function DashboardPage() {
                         </div>
                     </div>
                 </div>
+
+                {/* Low Stock Warning */}
+                {lowStockItems.length > 0 && (
+                    <div className="bg-red-50 border border-red-200 rounded-2xl p-4">
+                        <div className="flex items-center space-x-2 mb-3">
+                            <span className="text-red-500">⚠️</span>
+                            <h3 className="text-sm font-semibold text-red-800">Бага үлдсэн бараа</h3>
+                        </div>
+                        <div className="space-y-2">
+                            {lowStockItems.slice(0, 3).map((item, index) => (
+                                <div key={index} className="bg-white rounded-lg p-2 flex justify-between items-center">
+                                    <span className="text-xs text-gray-700">{item.name}</span>
+                                    <span className="text-xs font-medium text-red-600">
+                                        {item.quantity}/{item.minStock}
+                                    </span>
+                                </div>
+                            ))}
+                            {lowStockItems.length > 3 && (
+                                <div className="text-xs text-red-600 text-center">
+                                    +{lowStockItems.length - 3} бусад бараа
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
 
                 {/* Stores Grid */}
                 <div className="space-y-4">
