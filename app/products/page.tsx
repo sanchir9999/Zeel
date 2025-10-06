@@ -98,11 +98,29 @@ export default function ProductsPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
-            {/* Header */}
-            <div className="bg-white shadow-sm border-b">
+        <div className="min-h-screen bg-gray-50">
+            {/* Mobile Header */}
+            <div className="lg:hidden bg-white p-3 shadow-sm border-b sticky top-0 z-40">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                        <Link
+                            href="/dashboard"
+                            className="text-blue-600 hover:text-blue-800 transition-colors"
+                        >
+                            ←
+                        </Link>
+                        <h1 className="text-lg font-bold text-black">📦 Бараа</h1>
+                    </div>
+                    <div className="text-sm text-black font-medium">
+                        {filteredProducts.length}
+                    </div>
+                </div>
+            </div>
+
+            {/* Desktop Header */}
+            <div className="hidden lg:block bg-white shadow-sm border-b">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center py-4">
+                    <div className="flex justify-between items-center py-6">
                         <div className="flex items-center space-x-4">
                             <Link
                                 href="/dashboard"
@@ -110,35 +128,32 @@ export default function ProductsPage() {
                             >
                                 ← Буцах
                             </Link>
-                            <h1 className="text-2xl font-bold text-black">Нийт барааны жагсаалт</h1>
+                            <h1 className="text-2xl font-bold text-black">📦 Нийт барааны жагсаалт</h1>
                         </div>
-                        <div className="text-sm text-black">
+                        <div className="text-sm text-gray-600">
                             Нийт бараа: {filteredProducts.length}
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                {/* Хайлт болон шүүлт */}
-                <div className="bg-white rounded-xl p-4 mb-6 shadow-sm">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {/* Хайлтын талбар */}
+            <div className="p-3 lg:p-8 space-y-4 lg:space-y-6">
+                {/* Search & Filter */}
+                <div className="bg-white rounded-lg p-3 lg:p-4 shadow-sm">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
                         <input
                             type="text"
-                            placeholder="Барааны нэр, ангилал хайх..."
+                            placeholder="🔍 Барааны нэр, ангилал..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-black text-black"
+                            className="w-full px-3 py-2 lg:px-4 lg:py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-500 text-black text-sm lg:text-base"
                         />
-
-                        {/* Дэлгүүрээр шүүх */}
                         <select
                             value={selectedStore}
                             onChange={(e) => setSelectedStore(e.target.value)}
-                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
+                            className="w-full px-3 py-2 lg:px-4 lg:py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black text-sm lg:text-base"
                         >
-                            <option value="all">Бүх дэлгүүр</option>
+                            <option value="all">🏪 Бүх дэлгүүр</option>
                             {stores.map(store => (
                                 <option key={store.id} value={store.id}>{store.name}</option>
                             ))}
@@ -146,8 +161,8 @@ export default function ProductsPage() {
                     </div>
                 </div>
 
-                {/* Статистик */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                {/* Stats */}
+                <div className="grid grid-cols-3 lg:grid-cols-3 gap-3 lg:gap-4">
                     <div className="bg-white rounded-xl p-4 shadow-sm">
                         <h3 className="text-sm font-medium text-black">Нийт бараа</h3>
                         <p className="text-2xl font-bold text-blue-600">{filteredProducts.length}</p>

@@ -338,12 +338,17 @@ export default function OrderHistoryPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
-            {/* Header */}
-            <div className="bg-white shadow-sm border-b">
+        <div className="min-h-screen bg-gray-50">
+            {/* Mobile Header */}
+            <div className="lg:hidden bg-white p-3 shadow-sm border-b sticky top-0 z-40">
+                <h1 className="text-lg font-bold text-center text-black">📋 Захиалгын хуудас</h1>
+            </div>
+
+            {/* Desktop Header */}
+            <div className="hidden lg:block bg-white shadow-sm border-b">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center py-4">
-                        <h1 className="text-2xl font-bold text-gray-900">Захиалгын түүх</h1>
+                    <div className="flex justify-between items-center py-6">
+                        <h1 className="text-2xl font-bold text-gray-900">📋 Захиалгын хуудас</h1>
                         <div className="text-sm text-gray-500">
                             Нийт захиалга: {orders.length}
                         </div>
@@ -351,118 +356,83 @@ export default function OrderHistoryPage() {
                 </div>
             </div>
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                {/* Хайлтын талбар */}
-                <div className="bg-white rounded-xl p-4 mb-6 shadow-sm">
+            <div className="p-3 lg:p-8 space-y-4 lg:space-y-6">
+                {/* Search */}
+                <div className="bg-white rounded-lg p-3 lg:p-4 shadow-sm">
                     <input
                         type="text"
-                        placeholder="Захиалга хайх (харилцагчийн нэр, захиалгын дугаар, барааны нэр...)"
+                        placeholder="🔍 Хайх (нэр, дугаар, бараа...)"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-black text-black"
+                        className="w-full px-3 py-2 lg:px-4 lg:py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-500 text-black text-sm lg:text-base"
                     />
                 </div>
 
-                {/* Захиалгын жагсаалт - Grid layout */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {/* Orders List */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-3 lg:gap-4">
                     {filteredOrders.length === 0 ? (
-                        <div className="col-span-full bg-white rounded-xl p-8 text-center">
-                            <div className="text-gray-400 text-6xl mb-4">📋</div>
-                            <h3 className="text-lg font-medium text-gray-900 mb-2">Захиалга олдсонгүй</h3>
-                            <p className="text-gray-500">
-                                {searchTerm ? 'Хайлтын үр дүн олдсонгүй' : 'Захиалгын түүх хоосон байна'}
+                        <div className="col-span-full bg-white rounded-lg p-6 lg:p-8 text-center">
+                            <div className="text-gray-400 text-4xl lg:text-6xl mb-4">📋</div>
+                            <h3 className="text-base lg:text-lg font-medium text-gray-900 mb-2">Захиалга олдсонгүй</h3>
+                            <p className="text-sm text-gray-500">
+                                {searchTerm ? 'Хайлтын үр дүн олдсонгүй' : 'Захиалгын хуудас хоосон байна'}
                             </p>
                         </div>
                     ) : (
                         filteredOrders.map((order) => {
                             const { date, time } = formatDate(order.date)
                             return (
-                                <div key={order.id} className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105">
-                                    {/* Захиалгын header */}
-                                    <div className="mb-3">
-                                        <div className="flex items-center justify-between mb-2">
-                                            <h3 className="text-sm font-semibold text-gray-900 truncate">{order.customerName}</h3>
-                                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${order.payment?.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' :
-                                                    order.payment?.paymentStatus === 'partial' ? 'bg-yellow-100 text-yellow-800' :
-                                                        'bg-red-100 text-red-800'
-                                                }`}>
-                                                {order.payment?.paymentStatus === 'paid' ? 'Төлөгдсөн' :
-                                                    order.payment?.paymentStatus === 'partial' ? 'Үлдэгдэлтэй' : 'Төлөгдөөгүй'}
-                                            </span>
+                                <div key={order.id} className="bg-white rounded-lg p-3 lg:p-4 shadow-sm hover:shadow-md transition-all duration-200 transform hover:scale-105 active:scale-95">
+                                    {/* Header */}
+                                    <div className="flex items-center justify-between mb-3">
+                                        <div>
+                                            <h3 className="text-sm lg:text-base font-semibold text-gray-900 truncate">{order.customerName}</h3>
+                                            <p className="text-xs text-gray-500">#{order.id.slice(-8)}</p>
                                         </div>
-                                        <p className="text-xs text-gray-500 truncate">#{order.id.slice(-8)}</p>
-                                        <div className="flex justify-between items-center mt-2">
-                                            <div className="text-xs text-gray-500">
-                                                <div>{date}</div>
-                                                <div>{time}</div>
-                                            </div>
+                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${order.payment?.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' :
+                                            order.payment?.paymentStatus === 'partial' ? 'bg-yellow-100 text-yellow-800' :
+                                                'bg-red-100 text-red-800'
+                                            }`}>
+                                            {order.payment?.paymentStatus === 'paid' ? '✅' :
+                                                order.payment?.paymentStatus === 'partial' ? '⚠️' : '❌'}
+                                        </span>
+                                    </div>
+
+                                    {/* Amount & Date */}
+                                    <div className="flex justify-between items-center mb-3">
+                                        <div className="text-xs text-gray-500">
+                                            <div>📅 {date}</div>
+                                            <div>🕐 {time}</div>
+                                        </div>
+                                        <div className="text-right">
                                             <div className="text-lg font-bold text-green-600">
                                                 {order.totalAmount.toLocaleString()}₮
                                             </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Төлбөрийн мэдээлэл */}
-                                    <div className="border-t pt-3 mb-3">
-                                        <h4 className="text-xs font-medium text-gray-700 mb-2">Төлбөрийн мэдээлэл:</h4>
-                                        <div className="space-y-2">
-                                            <div className="flex justify-between items-center py-1 px-2 bg-gray-50 rounded text-xs">
-                                                <span className="text-gray-600">Нийт дүн:</span>
-                                                <span className="font-medium text-gray-900">{order.totalAmount.toLocaleString()}₮</span>
-                                            </div>
-                                            <div className="flex justify-between items-center py-1 px-2 bg-gray-50 rounded text-xs">
-                                                <span className="text-gray-600">Төлсөн дүн:</span>
-                                                <span className="font-medium text-green-600">
-                                                    {(order.payment?.totalPaid || 0).toLocaleString()}₮
-                                                </span>
-                                            </div>
-                                            <div className="flex justify-between items-center py-1 px-2 bg-gray-50 rounded text-xs">
-                                                <span className="text-gray-600">Үлдэгдэл:</span>
-                                                <span className={`font-medium ${(order.payment?.remainingAmount || order.totalAmount) > 0 ? 'text-red-600' : 'text-green-600'}`}>
-                                                    {(order.payment?.remainingAmount || order.totalAmount).toLocaleString()}₮
-                                                </span>
-                                            </div>
-                                            <div className="flex justify-between items-center py-1 px-2 bg-gray-50 rounded text-xs">
-                                                <span className="text-gray-600">Төлөв:</span>
-                                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${order.payment?.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' :
-                                                        order.payment?.paymentStatus === 'partial' ? 'bg-yellow-100 text-yellow-800' :
-                                                            'bg-red-100 text-red-800'
-                                                    }`}>
-                                                    {order.payment?.paymentStatus === 'paid' ? 'Төлөгдсөн' :
-                                                        order.payment?.paymentStatus === 'partial' ? 'Үлдэгдэлтэй' : 'Төлөгдөөгүй'}
-                                                </span>
+                                            <div className="text-xs text-gray-500">
+                                                Төлсөн: {(order.payment?.totalPaid || 0).toLocaleString()}₮
                                             </div>
                                         </div>
                                     </div>
 
-                                    {/* Товчнууд - гурван товч */}
+                                    {/* Buttons */}
                                     <div className="grid grid-cols-3 gap-2">
                                         <button
                                             onClick={() => deleteOrder(order.id, order.customerName)}
-                                            className="bg-red-500 hover:bg-red-600 active:bg-red-700 text-white py-2 px-2 rounded-lg text-xs font-medium transition-all duration-150 ease-in-out hover:scale-105 active:scale-95 active:shadow-lg transform flex items-center justify-center space-x-1"
+                                            className="bg-red-500 hover:bg-red-600 text-white py-2 px-2 rounded-lg text-xs font-medium transition-all transform active:scale-95 flex items-center justify-center"
                                         >
-                                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                            </svg>
-                                            <span>Устгах</span>
+                                            🗑️
                                         </button>
                                         <button
                                             onClick={() => printOrder(order)}
-                                            className="bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white py-2 px-2 rounded-lg text-xs font-medium transition-all duration-150 ease-in-out hover:scale-105 active:scale-95 active:shadow-lg transform flex items-center justify-center space-x-1"
+                                            className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-2 rounded-lg text-xs font-medium transition-all transform active:scale-95 flex items-center justify-center"
                                         >
-                                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                                            </svg>
-                                            <span>Хэвлэх</span>
+                                            🖨️
                                         </button>
                                         <button
                                             onClick={() => openPaymentModal(order)}
-                                            className="bg-green-500 hover:bg-green-600 active:bg-green-700 text-white py-2 px-2 rounded-lg text-xs font-medium transition-all duration-150 ease-in-out hover:scale-105 active:scale-95 active:shadow-lg transform flex items-center justify-center space-x-1"
+                                            className="bg-green-500 hover:bg-green-600 text-white py-2 px-2 rounded-lg text-xs font-medium transition-all transform active:scale-95 flex items-center justify-center"
                                         >
-                                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                                            </svg>
-                                            <span>Төлбөр</span>
+                                            💰
                                         </button>
                                     </div>
                                 </div>
@@ -517,8 +487,8 @@ export default function OrderHistoryPage() {
                             {/* Төлбөрийн статус badge */}
                             <div className="mt-4 text-center">
                                 <span className={`px-4 py-2 rounded-full text-sm font-medium ${selectedOrder.payment?.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' :
-                                        selectedOrder.payment?.paymentStatus === 'partial' ? 'bg-yellow-100 text-yellow-800' :
-                                            'bg-red-100 text-red-800'
+                                    selectedOrder.payment?.paymentStatus === 'partial' ? 'bg-yellow-100 text-yellow-800' :
+                                        'bg-red-100 text-red-800'
                                     }`}>
                                     {selectedOrder.payment?.paymentStatus === 'paid' ? 'Төлөгдсөн' :
                                         selectedOrder.payment?.paymentStatus === 'partial' ? 'Хэсэгчлэн төлөгдсөн' :

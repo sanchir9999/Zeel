@@ -8,17 +8,17 @@ export interface Product {
     variant?: string // жишээ: "Улаан", "Цэнхэр", "Жижиг", "Том"
     barcode?: string // штрих код
     sku?: string // Stock Keeping Unit
-    
+
     // Үндсэн quantity мэдээлэл
     quantity: number // Нийт ширхэг
     price: number // Ширхэгийн үнэ
-    
+
     // Хайрцагийн мэдээлэл (сонголттой)
     unitType?: 'piece' | 'box' // 'piece' = ширхэгээр, 'box' = хайрцагаар
     piecesPerBox?: number // Нэг хайрцагт хэдэн ширхэг
     boxQuantity?: number // Хайрцагийн тоо
     boxPrice?: number // Хайрцагийн үнэ
-    
+
     costPrice?: number // өртөг
     minStock?: number // доод хязгаар stock
     maxStock?: number // дээд хязгаар stock

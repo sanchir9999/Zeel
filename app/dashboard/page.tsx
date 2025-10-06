@@ -104,72 +104,83 @@ export default function DashboardPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
-            {/* Mobile App Header */}
-            <header className="bg-white shadow-lg">
-                <div className="px-4 py-4">
+        <div className="min-h-screen bg-gray-50">
+            {/* Mobile Header */}
+            <div className="lg:hidden bg-white p-3 shadow-sm border-b sticky top-0 z-40">
+                <div className="flex items-center justify-between">
+                    <h1 className="text-lg font-bold text-black">🏠 Dashboard</h1>
+                    <div className="flex items-center space-x-3">
+                        <div className="text-sm text-black font-medium">👤 {username}</div>
+                        <button
+                            onClick={handleLogout}
+                            className="bg-red-500 hover:bg-red-600 text-white p-1.5 rounded-full transition-colors"
+                        >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Desktop Header */}
+            <header className="hidden lg:block bg-white shadow-sm border-b">
+                <div className="px-8 py-6">
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                            <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
-                                <span className="text-white font-bold text-lg">🏪</span>
+                        <div className="flex items-center space-x-4">
+                            <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
+                                <span className="text-white font-bold">🏪</span>
                             </div>
                             <div>
-                                <h1 className="text-lg font-bold text-gray-900">Оюунгэрэл</h1>
-                                <p className="text-xs text-gray-500">Сайн байна уу, </p>
+                                <h1 className="text-xl font-bold text-gray-900">Оюунгэрэл</h1>
+                                <p className="text-sm text-gray-500">POS систем</p>
                             </div>
                         </div>
                         <button
                             onClick={handleLogout}
-                            className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transition-colors shadow-md"
+                            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors"
                         >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                            </svg>
+                            Гарах
                         </button>
                     </div>
                 </div>
             </header>
 
             {/* Main Content */}
-            <main className="p-4 space-y-6">
-                {/* Total Stats Cards */}
-                <div className="grid grid-cols-2 gap-4">
+            <main className="p-3 lg:p-8 space-y-4 lg:space-y-6">
+                {/* Stats Cards */}
+                <div className="grid grid-cols-2 lg:grid-cols-2 gap-3 lg:gap-6">
                     <Link href="/products">
-                        <div className="bg-white rounded-2xl p-4 shadow-sm border-l-4 border-blue-500 hover:shadow-lg transition-all duration-200 transform hover:scale-105 active:scale-95 cursor-pointer">
+                        <div className="bg-white rounded-lg p-3 lg:p-6 shadow-sm border hover:shadow-md transition-all transform active:scale-95">
                             <div className="text-center">
-                                <div className="text-2xl font-bold text-blue-600">{totalStats.totalProducts}</div>
-                                <div className="text-xs text-black">📦 Барааны төрөл</div>
+                                <div className="text-2xl lg:text-3xl mb-2">📦</div>
+                                <div className="text-lg lg:text-2xl font-bold text-blue-600">{totalStats.totalProducts}</div>
+                                <div className="text-xs lg:text-sm text-black">Бараа</div>
                             </div>
                         </div>
                     </Link>
                     <Link href="/order">
-                        <div className="bg-white rounded-2xl p-4 shadow-sm border-l-4 border-green-500 hover:shadow-lg transition-all duration-200 transform hover:scale-105 active:scale-95 cursor-pointer">
+                        <div className="bg-white rounded-lg p-3 lg:p-6 shadow-sm border hover:shadow-md transition-all transform active:scale-95">
                             <div className="text-center">
-                                <div className="text-lg font-bold text-green-600">{totalStats.dailyRevenue.toLocaleString()}₮</div>
-                                <div className="text-xs text-black">Өнөөдрийн орлого</div>
+                                <div className="text-2xl lg:text-3xl mb-2">💰</div>
+                                <div className="text-lg lg:text-xl font-bold text-green-600">{totalStats.dailyRevenue.toLocaleString()}₮</div>
+                                <div className="text-xs lg:text-sm text-black">Орлого</div>
                             </div>
                         </div>
                     </Link>
                 </div>
 
-                {/* Stores Grid */}
-                <div className="space-y-4">
-                    <h2 className="text-lg font-semibold text-gray-800 px-2">🏪 Дэлгүүрүүд</h2>
-                    <div className="grid grid-cols-1 gap-4">
+                {/* Stores */}
+                <div className="space-y-3 lg:space-y-4">
+                    <h2 className="text-lg lg:text-xl font-bold text-black">🏪 Дэлгүүрүүд</h2>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-4">
                         {stores.map((store) => (
                             <Link key={store.id} href={`/store/${store.id}`}>
-                                <div className="bg-white rounded-2xl shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]">
-                                    <div className={`${store.color} p-6 rounded-2xl`}>
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center space-x-3">
-                                                <span className="text-3xl">{store.icon}</span>
-                                                <div>
-                                                    <h3 className="text-lg font-semibold text-white">{store.name}</h3>
-                                                </div>
-                                            </div>
-                                            <svg className="w-6 h-6 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                                            </svg>
+                                <div className={`${store.color} p-6 lg:p-8 rounded-xl text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95`}>
+                                    <div className="flex flex-col items-center text-center space-y-4 lg:space-y-6">
+                                        <span className="text-5xl lg:text-6xl">{store.icon}</span>
+                                        <div>
+                                            <h3 className="font-bold text-xl lg:text-2xl">{store.name}</h3>
                                         </div>
                                     </div>
                                 </div>
@@ -177,65 +188,6 @@ export default function DashboardPage() {
                         ))}
                     </div>
                 </div>
-
-                {/* Quick Actions */}
-                <div className="space-y-4">
-                    <h2 className="text-lg font-semibold text-gray-800 px-2">⚡ Хурдан хандалт</h2>
-                    <div className="grid grid-cols-2 gap-4">
-                        <Link href="/order">
-                            <div className="bg-white rounded-2xl shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] p-6">
-                                <div className="text-center">
-                                    <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                                        <span className="text-2xl">🛒</span>
-                                    </div>
-                                    <h3 className="font-semibold text-gray-800 mb-1">Захиалга</h3>
-                                    <p className="text-xs text-gray-500">Шинэ захиалга үүсгэх</p>
-                                </div>
-                            </div>
-                        </Link>
-
-                        <Link href="/orders/history">
-                            <div className="bg-white rounded-2xl shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] p-6">
-                                <div className="text-center">
-                                    <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                                        <span className="text-2xl">�</span>
-                                    </div>
-                                    <h3 className="font-semibold text-gray-800 mb-1">Захиалгын түүх</h3>
-                                    <p className="text-xs text-gray-500">Өмнөх захиалгууд</p>
-                                </div>
-                            </div>
-                        </Link>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                        <Link href="/customers">
-                            <div className="bg-white rounded-2xl shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] p-6">
-                                <div className="text-center">
-                                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                                        <span className="text-2xl">👥</span>
-                                    </div>
-                                    <h3 className="font-semibold text-gray-800 mb-1">Харилцагчид</h3>
-                                    <p className="text-xs text-gray-500">Бүртгэл & түүх</p>
-                                </div>
-                            </div>
-                        </Link>
-
-                        <Link href="/reports">
-                            <div className="bg-white rounded-2xl shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] p-6">
-                                <div className="text-center">
-                                    <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                                        <span className="text-2xl">📊</span>
-                                    </div>
-                                    <h3 className="font-semibold text-gray-800 mb-1">Тайлан</h3>
-                                    <p className="text-xs text-gray-500">Статистик & орлого</p>
-                                </div>
-                            </div>
-                        </Link>
-                    </div>
-                </div>
-
-                {/* Bottom Spacing for mobile */}
-                <div className="h-6"></div>
             </main>
         </div>
     )

@@ -5,6 +5,7 @@ import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
 
 import Navbar from "./components/Navbar";
+import MobileNavigation from "./components/MobileNavigation";
 
 const rubik = Rubik({
   subsets: ["latin", "cyrillic"],
@@ -28,7 +29,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         className={`${rubik.className} ${geistMono.variable} antialiased flex min-h-screen flex-col bg-white`}
       >
         <Navbar />
-        <main className="flex-1 bg-white">{children}</main>
+        <main className="flex-1 bg-white pb-16 lg:pb-0">{children}</main>
+        <MobileNavigation />
         <Analytics />
       </body>
 

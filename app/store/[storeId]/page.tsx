@@ -22,13 +22,13 @@ export default function StorePage() {
     const [showAddForm, setShowAddForm] = useState(false)
     const [newProduct, setNewProduct] = useState({
         name: '',
-        quantity: 0,
-        price: 0,
+        quantity: undefined as number | undefined,
+        price: undefined as number | undefined,
         category: 'general',
         unitType: 'piece' as 'piece' | 'box',
-        piecesPerBox: 1,
-        boxQuantity: 0,
-        boxPrice: 0
+        piecesPerBox: undefined as number | undefined,
+        boxQuantity: undefined as number | undefined,
+        boxPrice: undefined as number | undefined
     })
 
     const currentStore = storeInfo[storeId]
@@ -58,7 +58,9 @@ export default function StorePage() {
 
     const handleAddProduct = async (e: React.FormEvent) => {
         e.preventDefault()
-        if (newProduct.name && newProduct.quantity > 0 && newProduct.price > 0) {
+        if (newProduct.name &&
+            newProduct.quantity !== undefined && newProduct.quantity > 0 &&
+            newProduct.price !== undefined && newProduct.price > 0) {
             try {
                 const { DataClient } = await import('../../../lib/api-client')
                 await DataClient.addProduct(storeId, {
@@ -78,15 +80,15 @@ export default function StorePage() {
                 // Reload products to get updated list
                 await loadProducts()
 
-                setNewProduct({ 
-                    name: '', 
-                    quantity: 0, 
-                    price: 0, 
+                setNewProduct({
+                    name: '',
+                    quantity: undefined,
+                    price: undefined,
                     category: 'general',
                     unitType: 'piece',
-                    piecesPerBox: 1,
-                    boxQuantity: 0,
-                    boxPrice: 0
+                    piecesPerBox: undefined,
+                    boxQuantity: undefined,
+                    boxPrice: undefined
                 })
                 setShowAddForm(false)
             } catch (error) {
@@ -143,10 +145,50 @@ export default function StorePage() {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            {/* Header */}
-            <header className="bg-white shadow">
+            {/* Mobile Header */}
+            <div className="lg:hidden bg-white p-3 shadow-sm border-b sticky top-0 z-40">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                        <Link
+                            href="/dashboard"
+                            className="text-blue-600 hover:text-blue-800 transition-colors"
+                        >
+                            ←
+                        </Link>
+                        <h1 className="text-lg font-bold text-black">
+                            {currentStore.name === 'Үндсэн дэлгүүр' && '🏬'}
+                            {currentStore.name === 'Мангас агуулах' && '📦'}
+                            {currentStore.name === '255 агуулах' && '📦'}
+                            {' '}{currentStore.name}
+                        </h1>
+                    </div>
+                    <button
+                        onClick={() => setShowAddForm(true)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
+                    >
+                        + Нэмэх
+                    </button>
+                </div>
+            </div>
+
+            {/* Desktop Header */}
+            <header className="hidden lg:block bg-white shadow">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-4 sm:py-6 space-y-3 sm:space-y-0">
+                        <div className="flex items-center space-x-4">
+                            <Link
+                                href="/dashboard"
+                                className="text-blue-600 hover:text-blue-800 transition-colors"
+                            >
+                                ← Dashboard-руу буцах
+                            </Link>
+                            <h1 className="text-2xl font-bold text-black">
+                                {currentStore.name === 'Үндсэн дэлгүүр' && '🏬'}
+                                {currentStore.name === 'Мангас агуулах' && '📦'}
+                                {currentStore.name === '255 агуулах' && '📦'}
+                                {' '}{currentStore.name}
+                            </h1>
+                        </div>
                         <button
                             onClick={() => setShowAddForm(true)}
                             className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 sm:py-2 rounded-md text-sm font-medium transition-colors"
@@ -158,61 +200,31 @@ export default function StorePage() {
             </header>
 
             {/* Stats */}
-            <div className="max-w-7xl mx-auto py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-                    <div className="bg-white overflow-hidden shadow rounded-lg">
-                        <div className="p-4 sm:p-5">
-                            <div className="flex items-center">
-                                <div className="flex-shrink-0">
-                                    <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                                        <span className="text-white text-sm font-bold">{products.length}</span>
-                                    </div>
-                                </div>
-                                <div className="ml-5 w-0 flex-1">
-                                    <dl>
-                                        <dt className="text-sm font-medium text-gray-500 truncate">Нийт бараа</dt>
-                                        <dd className="text-base sm:text-lg font-medium text-gray-900">{products.length} төрөл</dd>
-                                    </dl>
-                                </div>
-                            </div>
+            <div className="p-3 lg:p-8 space-y-4 lg:space-y-6">
+                <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4">
+                    <div className="bg-white rounded-lg p-3 lg:p-5 shadow-sm">
+                        <div className="text-center">
+                            <div className="text-2xl lg:text-3xl mb-2">📦</div>
+                            <div className="text-lg lg:text-xl font-bold text-blue-600">{products.length}</div>
+                            <div className="text-xs lg:text-sm text-black">Нийт бараа</div>
                         </div>
                     </div>
 
-                    <div className="bg-white overflow-hidden shadow rounded-lg">
-                        <div className="p-4 sm:p-5">
-                            <div className="flex items-center">
-                                <div className="flex-shrink-0">
-                                    <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                                        <span className="text-white text-sm font-bold">₮</span>
-                                    </div>
-                                </div>
-                                <div className="ml-5 w-0 flex-1">
-                                    <dl>
-                                        <dt className="text-sm font-medium text-gray-500 truncate">Нийт үнийн дүн</dt>
-                                        <dd className="text-base sm:text-lg font-medium text-gray-900">{totalValue.toLocaleString()}₮</dd>
-                                    </dl>
-                                </div>
-                            </div>
+                    <div className="bg-white rounded-lg p-3 lg:p-5 shadow-sm">
+                        <div className="text-center">
+                            <div className="text-2xl lg:text-3xl mb-2">💰</div>
+                            <div className="text-lg lg:text-xl font-bold text-green-600">{totalValue.toLocaleString()}₮</div>
+                            <div className="text-xs lg:text-sm text-black">Нийт үнэ</div>
                         </div>
                     </div>
 
-                    <div className="bg-white overflow-hidden shadow rounded-lg sm:col-span-2 lg:col-span-1">
-                        <div className="p-4 sm:p-5">
-                            <div className="flex items-center">
-                                <div className="flex-shrink-0">
-                                    <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
-                                        <span className="text-white text-sm font-bold">#</span>
-                                    </div>
-                                </div>
-                                <div className="ml-5 w-0 flex-1">
-                                    <dl>
-                                        <dt className="text-sm font-medium text-gray-500 truncate">Нийт тоо ширхэг</dt>
-                                        <dd className="text-base sm:text-lg font-medium text-gray-900">
-                                            {products.reduce((sum, p) => sum + p.quantity, 0)}
-                                        </dd>
-                                    </dl>
-                                </div>
+                    <div className="bg-white rounded-lg p-3 lg:p-5 shadow-sm col-span-2 lg:col-span-1">
+                        <div className="text-center">
+                            <div className="text-2xl lg:text-3xl mb-2">📊</div>
+                            <div className="text-lg lg:text-xl font-bold text-purple-600">
+                                {products.reduce((sum, product) => sum + product.quantity, 0)}
                             </div>
+                            <div className="text-xs lg:text-sm text-black">Нийт тоо</div>
                         </div>
                     </div>
                 </div>
@@ -229,7 +241,7 @@ export default function StorePage() {
                             {products.map((product) => (
                                 <div key={product.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                                     <div className="flex justify-between items-start mb-3">
-                                        <h4 className="font-medium text-gray-900 text-lg">{product.name}</h4>
+                                        <h4 className="font-medium text-black text-lg">{product.name}</h4>
                                         <button
                                             onClick={() => handleDeleteProduct(product.id)}
                                             className="text-red-600 hover:text-red-900 text-sm bg-red-50 px-2 py-1 rounded"
@@ -240,7 +252,7 @@ export default function StorePage() {
 
                                     <div className="grid grid-cols-2 gap-4 text-sm">
                                         <div>
-                                            <span className="text-gray-500">Тоо ширхэг:</span>
+                                            <span className="text-black font-medium">Тоо ширхэг:</span>
                                             <div className="mt-1">
                                                 <input
                                                     type="number"
@@ -252,25 +264,25 @@ export default function StorePage() {
                                             </div>
                                         </div>
                                         <div>
-                                            <span className="text-gray-500">Ширхэгийн үнэ:</span>
-                                            <div className="mt-1 font-medium">{product.price.toLocaleString()}₮</div>
+                                            <span className="text-black font-medium">Ширхэгийн үнэ:</span>
+                                            <div className="mt-1 font-medium text-black">{product.price.toLocaleString()}₮</div>
                                         </div>
                                     </div>
 
                                     {product.unitType === 'box' && (
                                         <div className="grid grid-cols-2 gap-4 text-sm mt-3 p-2 bg-blue-50 rounded">
                                             <div>
-                                                <span className="text-gray-500">Хайрцаг:</span>
+                                                <span className="text-black font-medium">Хайрцаг:</span>
                                                 <div className="mt-1 font-medium">
                                                     {product.boxQuantity || 0} хайрцаг
                                                 </div>
                                             </div>
                                             <div>
-                                                <span className="text-gray-500">Хайрцагийн үнэ:</span>
+                                                <span className="text-black font-medium">Хайрцагийн үнэ:</span>
                                                 <div className="mt-1 font-medium">{(product.boxPrice || 0).toLocaleString()}₮</div>
                                             </div>
                                             <div className="col-span-2">
-                                                <span className="text-gray-500">1 хайрцагт:</span>
+                                                <span className="text-black font-medium">1 хайрцагт:</span>
                                                 <span className="ml-1 font-medium">{product.piecesPerBox || 1} ширхэг</span>
                                             </div>
                                         </div>
@@ -278,14 +290,14 @@ export default function StorePage() {
 
                                     <div className="grid grid-cols-2 gap-4 text-sm mt-3">
                                         <div>
-                                            <span className="text-gray-500">Нийт үнэ:</span>
+                                            <span className="text-black font-medium">Нийт үнэ:</span>
                                             <div className="mt-1 font-semibold text-green-600">
                                                 {(product.quantity * product.price).toLocaleString()}₮
                                             </div>
                                         </div>
                                         <div>
-                                            <span className="text-gray-500">Нэмсэн огноо:</span>
-                                            <div className="mt-1">{product.addedDate}</div>
+                                            <span className="text-black font-medium">Нэмсэн огноо:</span>
+                                            <div className="mt-1 text-black font-medium">{product.addedDate}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -324,10 +336,10 @@ export default function StorePage() {
                             <tbody className="bg-white divide-y divide-gray-200">
                                 {products.map((product) => (
                                     <tr key={product.id}>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-black">
                                             {product.name}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-black">
                                             <input
                                                 type="number"
                                                 value={product.quantity}
@@ -336,21 +348,21 @@ export default function StorePage() {
                                                 min="0"
                                             />
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-black">
                                             {product.unitType === 'box' ? (
                                                 <div className="space-y-1">
                                                     <div className="text-blue-600 font-medium">
                                                         {product.boxQuantity || 0} хайрцаг
                                                     </div>
-                                                    <div className="text-xs text-gray-400">
+                                                    <div className="text-xs text-black">
                                                         {product.piecesPerBox || 1} ширхэг/хайрцаг
                                                     </div>
                                                 </div>
                                             ) : (
-                                                <span className="text-gray-400">Ширхэгээр</span>
+                                                <span className="text-black">Ширхэгээр</span>
                                             )}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-black">
                                             <div className="space-y-1">
                                                 <div>{product.price.toLocaleString()}₮/ширхэг</div>
                                                 {product.unitType === 'box' && (
@@ -360,10 +372,10 @@ export default function StorePage() {
                                                 )}
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-black font-medium">
                                             {(product.quantity * product.price).toLocaleString()}₮
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-black">
                                             {product.addedDate}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -424,10 +436,10 @@ export default function StorePage() {
                                             type="number"
                                             required
                                             min="1"
-                                            value={newProduct.quantity}
+                                            value={newProduct.quantity || ''}
                                             onChange={(e) => setNewProduct({ ...newProduct, quantity: parseInt(e.target.value) || 0 })}
-                                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-black placeholder-black"
-                                            placeholder="0"
+                                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-black"
+                                            placeholder="Тоо ширхэг оруулна уу"
                                         />
                                     </div>
 
@@ -455,10 +467,10 @@ export default function StorePage() {
                                                     type="number"
                                                     required
                                                     min="1"
-                                                    value={newProduct.piecesPerBox}
+                                                    value={newProduct.piecesPerBox || ''}
                                                     onChange={(e) => setNewProduct({ ...newProduct, piecesPerBox: parseInt(e.target.value) || 1 })}
-                                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-black placeholder-black"
-                                                    placeholder="1"
+                                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-black"
+                                                    placeholder="Нэг хайрцагт хэдэн ширхэг"
                                                 />
                                             </div>
                                             <div>
@@ -469,18 +481,19 @@ export default function StorePage() {
                                                     type="number"
                                                     required
                                                     min="0"
-                                                    value={newProduct.boxQuantity}
+                                                    value={newProduct.boxQuantity || ''}
                                                     onChange={(e) => {
                                                         const boxQty = parseInt(e.target.value) || 0
-                                                        const totalPieces = boxQty * newProduct.piecesPerBox
-                                                        setNewProduct({ 
-                                                            ...newProduct, 
+                                                        const piecesPerBox = newProduct.piecesPerBox || 1
+                                                        const totalPieces = boxQty * piecesPerBox
+                                                        setNewProduct({
+                                                            ...newProduct,
                                                             boxQuantity: boxQty,
-                                                            quantity: totalPieces 
+                                                            quantity: totalPieces
                                                         })
                                                     }}
-                                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-black placeholder-black"
-                                                    placeholder="0"
+                                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-black"
+                                                    placeholder="Хайрцагийн тоо оруулна уу"
                                                 />
                                             </div>
                                             <div>
@@ -491,18 +504,19 @@ export default function StorePage() {
                                                     type="number"
                                                     required
                                                     min="1"
-                                                    value={newProduct.boxPrice}
+                                                    value={newProduct.boxPrice || ''}
                                                     onChange={(e) => {
                                                         const boxPrice = parseInt(e.target.value) || 0
-                                                        const piecePrice = newProduct.piecesPerBox > 0 ? Math.round(boxPrice / newProduct.piecesPerBox) : 0
-                                                        setNewProduct({ 
-                                                            ...newProduct, 
+                                                        const piecesPerBox = newProduct.piecesPerBox || 1
+                                                        const piecePrice = piecesPerBox > 0 ? Math.round(boxPrice / piecesPerBox) : 0
+                                                        setNewProduct({
+                                                            ...newProduct,
                                                             boxPrice: boxPrice,
-                                                            price: piecePrice 
+                                                            price: piecePrice
                                                         })
                                                     }}
-                                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-black placeholder-black"
-                                                    placeholder="0"
+                                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-black"
+                                                    placeholder="Хайрцагийн үнэ оруулна уу"
                                                 />
                                             </div>
                                         </>
@@ -533,10 +547,10 @@ export default function StorePage() {
                                             type="number"
                                             required
                                             min="1"
-                                            value={newProduct.price}
+                                            value={newProduct.price || ''}
                                             onChange={(e) => setNewProduct({ ...newProduct, price: parseInt(e.target.value) || 0 })}
-                                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-black placeholder-black"
-                                            placeholder="0"
+                                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-black"
+                                            placeholder="Ширхэгийн үнэ оруулна уу"
                                             disabled={newProduct.unitType === 'box'}
                                         />
                                     </div>

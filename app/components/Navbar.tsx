@@ -42,8 +42,8 @@ export default function Navbar() {
 
     return (
         <>
-            {/* Top Navigation - для store pages etc */}
-            <nav className="sticky top-0 z-50 bg-white shadow-sm border-b">
+            {/* Top Navigation - Desktop only */}
+            <nav className="sticky top-0 z-50 bg-white shadow-sm border-b hidden lg:block">
                 <div className="px-4 py-3">
                     <div className="flex items-center justify-between">
                         {/* Back Button */}

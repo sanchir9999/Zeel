@@ -263,7 +263,7 @@ export default function CustomersPage() {
 
                                 {/* Order History - Compact */}
                                 <div>
-                                    <h4 className="text-sm font-semibold mb-2 text-black">Захиалгын түүх</h4>
+                                    <h4 className="text-sm font-semibold mb-2 text-black">Захиалгын хуудас</h4>
                                     {getCustomerOrders(selectedCustomer.name).length === 0 ? (
                                         <p className="text-black text-xs">Одоогоор захиалга байхгүй</p>
                                     ) : (
