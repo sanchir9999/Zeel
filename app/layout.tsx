@@ -2,6 +2,7 @@
 import type { Metadata } from "next";
 import { Rubik, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/next";
 
 import Navbar from "./components/Navbar";
 
@@ -28,6 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       >
         <Navbar />
         <main className="flex-1 bg-white">{children}</main>
+        <Analytics />
       </body>
 
 

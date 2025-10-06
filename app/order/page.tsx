@@ -228,16 +228,39 @@ export default function OrderPage() {
                 return false
             }
 
-            // Stock-аас автоматаар хасах
+            // Stock-аас автоматаар хасах (API ашиглан)
             for (const item of orderItems) {
-                const storeId = item.storeId || 'main'
-                const allProducts = await DataClient.getProducts(storeId)
-                const productIndex = allProducts.findIndex(p => p.id === item.productId)
+                try {
+                    const storeId = item.storeId || 'main'
 
-                if (productIndex !== -1) {
-                    allProducts[productIndex].quantity -= item.quantity
-                    allProducts[productIndex].lastUpdated = new Date().toISOString()
-                    localStorage.setItem(`products_${storeId}`, JSON.stringify(allProducts))
+                    // Одоогийн барааны мэдээллийг авах
+                    const allProducts = await DataClient.getProducts(storeId)
+                    const product = allProducts.find(p => p.id === item.productId)
+
+                    if (product) {
+                        const newQuantity = product.quantity - item.quantity
+
+                        // API-ээр дамжуулан барааны үлдэгдэл шинэчлэх
+                        const updateResponse = await fetch(`/api/products/${storeId}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                productId: item.productId,
+                                quantity: newQuantity,
+                                lastUpdated: new Date().toISOString()
+                            })
+                        })
+
+                        if (!updateResponse.ok) {
+                            console.error(`Failed to update stock for product ${item.productName}`)
+                        } else {
+                            console.log(`Барааны үлдэгдэл шинэчлэгдлээ: ${item.productName}, шинэ үлдэгдэл: ${newQuantity}`)
+                        }
+                    }
+                } catch (error) {
+                    console.error(`Error updating stock for ${item.productName}:`, error)
                 }
             }
 

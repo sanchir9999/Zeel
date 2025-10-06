@@ -24,7 +24,11 @@ export default function StorePage() {
         name: '',
         quantity: 0,
         price: 0,
-        category: 'general'
+        category: 'general',
+        unitType: 'piece' as 'piece' | 'box',
+        piecesPerBox: 1,
+        boxQuantity: 0,
+        boxPrice: 0
     })
 
     const currentStore = storeInfo[storeId]
@@ -64,12 +68,26 @@ export default function StorePage() {
                     addedDate: new Date().toLocaleDateString('mn-MN'),
                     category: newProduct.category,
                     storeId,
+                    // Хайрцагийн мэдээлэл
+                    unitType: newProduct.unitType,
+                    piecesPerBox: newProduct.unitType === 'box' ? newProduct.piecesPerBox : undefined,
+                    boxQuantity: newProduct.unitType === 'box' ? newProduct.boxQuantity : undefined,
+                    boxPrice: newProduct.unitType === 'box' ? newProduct.boxPrice : undefined,
                 })
 
                 // Reload products to get updated list
                 await loadProducts()
 
-                setNewProduct({ name: '', quantity: 0, price: 0, category: 'general' })
+                setNewProduct({ 
+                    name: '', 
+                    quantity: 0, 
+                    price: 0, 
+                    category: 'general',
+                    unitType: 'piece',
+                    piecesPerBox: 1,
+                    boxQuantity: 0,
+                    boxPrice: 0
+                })
                 setShowAddForm(false)
             } catch (error) {
                 console.error('Error adding product:', error)
@@ -234,10 +252,29 @@ export default function StorePage() {
                                             </div>
                                         </div>
                                         <div>
-                                            <span className="text-gray-500">Нэгжийн үнэ:</span>
+                                            <span className="text-gray-500">Ширхэгийн үнэ:</span>
                                             <div className="mt-1 font-medium">{product.price.toLocaleString()}₮</div>
                                         </div>
                                     </div>
+
+                                    {product.unitType === 'box' && (
+                                        <div className="grid grid-cols-2 gap-4 text-sm mt-3 p-2 bg-blue-50 rounded">
+                                            <div>
+                                                <span className="text-gray-500">Хайрцаг:</span>
+                                                <div className="mt-1 font-medium">
+                                                    {product.boxQuantity || 0} хайрцаг
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <span className="text-gray-500">Хайрцагийн үнэ:</span>
+                                                <div className="mt-1 font-medium">{(product.boxPrice || 0).toLocaleString()}₮</div>
+                                            </div>
+                                            <div className="col-span-2">
+                                                <span className="text-gray-500">1 хайрцагт:</span>
+                                                <span className="ml-1 font-medium">{product.piecesPerBox || 1} ширхэг</span>
+                                            </div>
+                                        </div>
+                                    )}
 
                                     <div className="grid grid-cols-2 gap-4 text-sm mt-3">
                                         <div>
@@ -266,6 +303,9 @@ export default function StorePage() {
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider">
                                         Тоо ширхэг
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider">
+                                        Хайрцаг
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider">
                                         Нэгжийн үнэ
@@ -297,7 +337,28 @@ export default function StorePage() {
                                             />
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {product.price.toLocaleString()}₮
+                                            {product.unitType === 'box' ? (
+                                                <div className="space-y-1">
+                                                    <div className="text-blue-600 font-medium">
+                                                        {product.boxQuantity || 0} хайрцаг
+                                                    </div>
+                                                    <div className="text-xs text-gray-400">
+                                                        {product.piecesPerBox || 1} ширхэг/хайрцаг
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <span className="text-gray-400">Ширхэгээр</span>
+                                            )}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <div className="space-y-1">
+                                                <div>{product.price.toLocaleString()}₮/ширхэг</div>
+                                                {product.unitType === 'box' && (
+                                                    <div className="text-xs text-blue-600">
+                                                        {(product.boxPrice || 0).toLocaleString()}₮/хайрцаг
+                                                    </div>
+                                                )}
+                                            </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {(product.quantity * product.price).toLocaleString()}₮
@@ -372,6 +433,83 @@ export default function StorePage() {
 
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Борлуулах нэгж
+                                        </label>
+                                        <select
+                                            value={newProduct.unitType}
+                                            onChange={(e) => setNewProduct({ ...newProduct, unitType: e.target.value as 'piece' | 'box' })}
+                                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-black"
+                                        >
+                                            <option value="piece">Ширхэгээр</option>
+                                            <option value="box">Хайрцгаар</option>
+                                        </select>
+                                    </div>
+
+                                    {newProduct.unitType === 'box' && (
+                                        <>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                    Нэг хайрцагт хэдэн ширхэг
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    required
+                                                    min="1"
+                                                    value={newProduct.piecesPerBox}
+                                                    onChange={(e) => setNewProduct({ ...newProduct, piecesPerBox: parseInt(e.target.value) || 1 })}
+                                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-black placeholder-black"
+                                                    placeholder="1"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                    Хайрцагийн тоо
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    required
+                                                    min="0"
+                                                    value={newProduct.boxQuantity}
+                                                    onChange={(e) => {
+                                                        const boxQty = parseInt(e.target.value) || 0
+                                                        const totalPieces = boxQty * newProduct.piecesPerBox
+                                                        setNewProduct({ 
+                                                            ...newProduct, 
+                                                            boxQuantity: boxQty,
+                                                            quantity: totalPieces 
+                                                        })
+                                                    }}
+                                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-black placeholder-black"
+                                                    placeholder="0"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                    Хайрцагийн үнэ (₮)
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    required
+                                                    min="1"
+                                                    value={newProduct.boxPrice}
+                                                    onChange={(e) => {
+                                                        const boxPrice = parseInt(e.target.value) || 0
+                                                        const piecePrice = newProduct.piecesPerBox > 0 ? Math.round(boxPrice / newProduct.piecesPerBox) : 0
+                                                        setNewProduct({ 
+                                                            ...newProduct, 
+                                                            boxPrice: boxPrice,
+                                                            price: piecePrice 
+                                                        })
+                                                    }}
+                                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-black placeholder-black"
+                                                    placeholder="0"
+                                                />
+                                            </div>
+                                        </>
+                                    )}
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
                                             Ангилал
                                         </label>
                                         <select
@@ -389,7 +527,7 @@ export default function StorePage() {
 
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Нэгжийн үнэ (₮)
+                                            {newProduct.unitType === 'box' ? 'Ширхэгийн үнэ (автомат тооцох)' : 'Ширхэгийн үнэ'} (₮)
                                         </label>
                                         <input
                                             type="number"
@@ -399,6 +537,7 @@ export default function StorePage() {
                                             onChange={(e) => setNewProduct({ ...newProduct, price: parseInt(e.target.value) || 0 })}
                                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-black placeholder-black"
                                             placeholder="0"
+                                            disabled={newProduct.unitType === 'box'}
                                         />
                                     </div>
 
