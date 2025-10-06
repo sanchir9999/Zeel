@@ -156,8 +156,8 @@ export default function OrderHistoryPage() {
             }
 
             const newTotalPaid = currentPaid + amount
-            const newPaymentStatus: 'paid' | 'partial' | 'unpaid' = newTotalPaid >= selectedOrder.totalAmount ? 'paid' : 
-                                   newTotalPaid > 0 ? 'partial' : 'unpaid'
+            const newPaymentStatus: 'paid' | 'partial' | 'unpaid' = newTotalPaid >= selectedOrder.totalAmount ? 'paid' :
+                newTotalPaid > 0 ? 'partial' : 'unpaid'
 
             // Захиалгын төлбөрийн мэдээллийг шинэчлэх
             const updatedOrder = {
@@ -181,7 +181,7 @@ export default function OrderHistoryPage() {
 
             if (response.ok) {
                 // Local state шинэчлэх
-                const updatedOrders = orders.map(order => 
+                const updatedOrders = orders.map(order =>
                     order.id === selectedOrder.id ? updatedOrder : order
                 )
                 setOrders(updatedOrders)
@@ -193,7 +193,7 @@ export default function OrderHistoryPage() {
                             item.productName.toLowerCase().includes(searchTerm.toLowerCase())
                         )
                 }))
-                
+
                 alert(`Төлбөр амжилттай нэмэгдлээ! Төлсөн дүн: ${amount.toLocaleString()}₮`)
                 closePaymentModal()
             } else {
@@ -382,10 +382,9 @@ export default function OrderHistoryPage() {
                                     <div className="mb-3">
                                         <div className="flex items-center justify-between mb-2">
                                             <h3 className="text-sm font-semibold text-gray-900 truncate">{order.customerName}</h3>
-                                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                                order.payment?.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' :
-                                                order.payment?.paymentStatus === 'partial' ? 'bg-yellow-100 text-yellow-800' :
-                                                    'bg-red-100 text-red-800'
+                                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${order.payment?.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' :
+                                                    order.payment?.paymentStatus === 'partial' ? 'bg-yellow-100 text-yellow-800' :
+                                                        'bg-red-100 text-red-800'
                                                 }`}>
                                                 {order.payment?.paymentStatus === 'paid' ? 'Төлөгдсөн' :
                                                     order.payment?.paymentStatus === 'partial' ? 'Үлдэгдэлтэй' : 'Төлөгдөөгүй'}
@@ -425,13 +424,12 @@ export default function OrderHistoryPage() {
                                             </div>
                                             <div className="flex justify-between items-center py-1 px-2 bg-gray-50 rounded text-xs">
                                                 <span className="text-gray-600">Төлөв:</span>
-                                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                                    order.payment?.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' :
-                                                    order.payment?.paymentStatus === 'partial' ? 'bg-yellow-100 text-yellow-800' :
-                                                    'bg-red-100 text-red-800'
-                                                }`}>
+                                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${order.payment?.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' :
+                                                        order.payment?.paymentStatus === 'partial' ? 'bg-yellow-100 text-yellow-800' :
+                                                            'bg-red-100 text-red-800'
+                                                    }`}>
                                                     {order.payment?.paymentStatus === 'paid' ? 'Төлөгдсөн' :
-                                                     order.payment?.paymentStatus === 'partial' ? 'Үлдэгдэлтэй' : 'Төлөгдөөгүй'}
+                                                        order.payment?.paymentStatus === 'partial' ? 'Үлдэгдэлтэй' : 'Төлөгдөөгүй'}
                                                 </span>
                                             </div>
                                         </div>
@@ -518,14 +516,13 @@ export default function OrderHistoryPage() {
 
                             {/* Төлбөрийн статус badge */}
                             <div className="mt-4 text-center">
-                                <span className={`px-4 py-2 rounded-full text-sm font-medium ${
-                                    selectedOrder.payment?.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' :
-                                    selectedOrder.payment?.paymentStatus === 'partial' ? 'bg-yellow-100 text-yellow-800' :
-                                    'bg-red-100 text-red-800'
-                                }`}>
+                                <span className={`px-4 py-2 rounded-full text-sm font-medium ${selectedOrder.payment?.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' :
+                                        selectedOrder.payment?.paymentStatus === 'partial' ? 'bg-yellow-100 text-yellow-800' :
+                                            'bg-red-100 text-red-800'
+                                    }`}>
                                     {selectedOrder.payment?.paymentStatus === 'paid' ? 'Төлөгдсөн' :
-                                     selectedOrder.payment?.paymentStatus === 'partial' ? 'Хэсэгчлэн төлөгдсөн' :
-                                     'Төлөгдөөгүй'}
+                                        selectedOrder.payment?.paymentStatus === 'partial' ? 'Хэсэгчлэн төлөгдсөн' :
+                                            'Төлөгдөөгүй'}
                                 </span>
                             </div>
                         </div>
@@ -574,8 +571,8 @@ export default function OrderHistoryPage() {
                                                     </div>
                                                 </div>
                                                 <div className="text-xs text-gray-500">
-                                                    {payment.method === 'cash' ? 'Бэлэн' : 
-                                                     payment.method === 'card' ? 'Карт' : 'Шилжүүлэг'}
+                                                    {payment.method === 'cash' ? 'Бэлэн' :
+                                                        payment.method === 'card' ? 'Карт' : 'Шилжүүлэг'}
                                                 </div>
                                             </div>
                                         )

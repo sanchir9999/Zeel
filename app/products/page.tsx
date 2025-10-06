@@ -104,7 +104,7 @@ export default function ProductsPage() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center py-4">
                         <div className="flex items-center space-x-4">
-                            <Link 
+                            <Link
                                 href="/dashboard"
                                 className="text-blue-600 hover:text-blue-800 transition-colors"
                             >
@@ -131,7 +131,7 @@ export default function ProductsPage() {
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-black text-black"
                         />
-                        
+
                         {/* Дэлгүүрээр шүүх */}
                         <select
                             value={selectedStore}
@@ -202,7 +202,7 @@ export default function ProductsPage() {
                                         </div>
                                         <div className="flex justify-between items-center">
                                             <span className="text-xs text-black">Үлдэгдэл:</span>
-                                            <span className={`font-medium text-sm ${product.quantity === 0 ? 'text-red-500' : 
+                                            <span className={`font-medium text-sm ${product.quantity === 0 ? 'text-red-500' :
                                                 product.quantity < 10 ? 'text-yellow-600' : 'text-green-600'}`}>
                                                 {product.quantity}
                                             </span>
