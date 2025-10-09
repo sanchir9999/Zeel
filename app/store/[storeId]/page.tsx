@@ -20,15 +20,27 @@ export default function StorePage() {
     const [isLoggedIn, setIsLoggedIn] = useState(false)
     const [products, setProducts] = useState<Product[]>([])
     const [showAddForm, setShowAddForm] = useState(false)
+    const [showEditForm, setShowEditForm] = useState(false)
+    const [editingProduct, setEditingProduct] = useState<Product | null>(null)
     const [newProduct, setNewProduct] = useState({
         name: '',
         quantity: undefined as number | undefined,
         price: undefined as number | undefined,
-        category: 'general',
-        unitType: 'piece' as 'piece' | 'box',
+        category: 'ready-food',
         piecesPerBox: undefined as number | undefined,
         boxQuantity: undefined as number | undefined,
-        boxPrice: undefined as number | undefined
+        boxPrice: undefined as number | undefined,
+        expiryDate: '' as string
+    })
+    const [editProduct, setEditProduct] = useState({
+        name: '',
+        quantity: undefined as number | undefined,
+        price: undefined as number | undefined,
+        category: 'ready-food',
+        piecesPerBox: undefined as number | undefined,
+        boxQuantity: undefined as number | undefined,
+        boxPrice: undefined as number | undefined,
+        expiryDate: '' as string
     })
 
     const currentStore = storeInfo[storeId]
@@ -71,10 +83,11 @@ export default function StorePage() {
                     category: newProduct.category,
                     storeId,
                     // Хайрцагийн мэдээлэл
-                    unitType: newProduct.unitType,
-                    piecesPerBox: newProduct.unitType === 'box' ? newProduct.piecesPerBox : undefined,
-                    boxQuantity: newProduct.unitType === 'box' ? newProduct.boxQuantity : undefined,
-                    boxPrice: newProduct.unitType === 'box' ? newProduct.boxPrice : undefined,
+                    unitType: 'box',
+                    piecesPerBox: newProduct.piecesPerBox,
+                    boxQuantity: newProduct.boxQuantity,
+                    boxPrice: newProduct.boxPrice,
+                    expiryDate: newProduct.expiryDate,
                 })
 
                 // Reload products to get updated list
@@ -84,16 +97,45 @@ export default function StorePage() {
                     name: '',
                     quantity: undefined,
                     price: undefined,
-                    category: 'general',
-                    unitType: 'piece',
+                    category: 'ready-food',
                     piecesPerBox: undefined,
                     boxQuantity: undefined,
-                    boxPrice: undefined
+                    boxPrice: undefined,
+                    expiryDate: ''
                 })
                 setShowAddForm(false)
             } catch (error) {
                 console.error('Error adding product:', error)
                 alert('Бараа нэмэхэд алдаа гарлаа')
+            }
+        }
+    }
+
+    const handleEditProductSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        if (editingProduct && editProduct.name &&
+            editProduct.quantity !== undefined && editProduct.quantity > 0 &&
+            editProduct.price !== undefined && editProduct.price > 0) {
+            try {
+                const { DataClient } = await import('../../../lib/api-client')
+                await DataClient.updateProduct(storeId, editingProduct.id, {
+                    name: editProduct.name,
+                    quantity: editProduct.quantity,
+                    price: editProduct.price,
+                    category: editProduct.category,
+                    piecesPerBox: editProduct.piecesPerBox,
+                    boxQuantity: editProduct.boxQuantity,
+                    boxPrice: editProduct.boxPrice,
+                    expiryDate: editProduct.expiryDate,
+                    unitType: 'box'
+                })
+
+                await loadProducts()
+                setShowEditForm(false)
+                setEditingProduct(null)
+            } catch (error) {
+                console.error('Error updating product:', error)
+                alert('Бараа засахад алдаа гарлаа')
             }
         }
     }
@@ -122,6 +164,59 @@ export default function StorePage() {
                 alert('Барааны тоо ширхэг шинэчлэхэд алдаа гарлаа')
             }
         }
+    }
+
+    const getCategoryName = (categoryValue: string) => {
+        const categoryMap: { [key: string]: string } = {
+            'ready-food': 'Бэлэн хоол',
+            'goymon': 'Гоймон',
+            'pichen': 'Пичень',
+            'chocolate': 'Шоколад',
+            'nabor': 'Набор',
+            'rezinen-chikher': 'Резинен чихэр',
+            'urlen-chikher': 'Үрлэн чихэр',
+            'bokh': 'Бохь',
+            'choco-paya': 'Чоко Пая',
+            'box-pichen': 'Хайрцаг пичень',
+            'ishtei-chikher': 'Иштэй чихэр',
+            'tos': 'Тос',
+            'salad-types': 'Салад төрөл',
+            'varen': 'Варень',
+            'kg-chikher': 'Кг чихэр',
+            'kg-pichen': 'Кг пичень',
+            'amtlagch': 'Амтлагч',
+            'samryn-types': 'Самрын төрөл',
+            'chibs': 'Чибс',
+            'sea-buckthorn': 'Далайн байцаа',
+            'drinks': 'Ундаа',
+            'fish': 'Загас',
+            'coffee-tea': 'Кофе цай',
+            'tea-idea': 'Цай идээ',
+            'yooton': 'Ёотон',
+            'celcegnuur': 'Цэлцэгнүүр',
+            'rulet': 'Рулет',
+            'sok': 'Сок',
+            'kompod': 'Компод',
+            'salt': 'Давс',
+            'small-goods': 'Жижиглэн бараа',
+            'german-goods': 'Герман бараа'
+        }
+        return categoryMap[categoryValue] || categoryValue
+    }
+
+    const handleEditProduct = (product: Product) => {
+        setEditingProduct(product)
+        setEditProduct({
+            name: product.name,
+            quantity: product.quantity,
+            price: product.price,
+            category: product.category,
+            piecesPerBox: product.piecesPerBox,
+            boxQuantity: product.boxQuantity,
+            boxPrice: product.boxPrice,
+            expiryDate: product.expiryDate || ''
+        })
+        setShowEditForm(true)
     }
 
     if (!isLoggedIn) {
@@ -242,12 +337,26 @@ export default function StorePage() {
                                 <div key={product.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                                     <div className="flex justify-between items-start mb-3">
                                         <h4 className="font-medium text-black text-lg">{product.name}</h4>
-                                        <button
-                                            onClick={() => handleDeleteProduct(product.id)}
-                                            className="text-red-600 hover:text-red-900 text-sm bg-red-50 px-2 py-1 rounded"
-                                        >
-                                            Устгах
-                                        </button>
+                                        <div className="flex space-x-2">
+                                            <button
+                                                onClick={() => handleEditProduct(product)}
+                                                className="text-blue-600 hover:text-blue-900 text-sm bg-blue-50 px-2 py-1 rounded"
+                                            >
+                                                Засах
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeleteProduct(product.id)}
+                                                className="text-red-600 hover:text-red-900 text-sm bg-red-50 px-2 py-1 rounded"
+                                            >
+                                                Устгах
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div className="mb-3">
+                                        <span className="px-2 py-1 bg-gray-100 rounded text-xs text-black">
+                                            {getCategoryName(product.category)}
+                                        </span>
                                     </div>
 
                                     <div className="grid grid-cols-2 gap-4 text-sm">
@@ -299,6 +408,23 @@ export default function StorePage() {
                                             <span className="text-black font-medium">Нэмсэн огноо:</span>
                                             <div className="mt-1 text-black font-medium">{product.addedDate}</div>
                                         </div>
+                                        <div>
+                                            <span className="text-black font-medium">Дуусах хугацаа:</span>
+                                            <div className="mt-1">
+                                                {product.expiryDate ? (
+                                                    <span className={`px-2 py-1 rounded text-xs ${new Date(product.expiryDate) < new Date()
+                                                            ? 'bg-red-100 text-red-800'
+                                                            : new Date(product.expiryDate) < new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+                                                                ? 'bg-yellow-100 text-yellow-800'
+                                                                : 'bg-green-100 text-green-800'
+                                                        }`}>
+                                                        {product.expiryDate}
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-gray-400">-</span>
+                                                )}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             ))}
@@ -327,6 +453,12 @@ export default function StorePage() {
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider">
                                         Нэмсэн огноо
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider">
+                                        Дуусах хугацаа
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider">
+                                        Ангилал
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider">
                                         Үйлдэл
@@ -378,7 +510,32 @@ export default function StorePage() {
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-black">
                                             {product.addedDate}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-black">
+                                            {product.expiryDate ? (
+                                                <span className={`px-2 py-1 rounded text-xs ${new Date(product.expiryDate) < new Date()
+                                                        ? 'bg-red-100 text-red-800'
+                                                        : new Date(product.expiryDate) < new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+                                                            ? 'bg-yellow-100 text-yellow-800'
+                                                            : 'bg-green-100 text-green-800'
+                                                    }`}>
+                                                    {product.expiryDate}
+                                                </span>
+                                            ) : (
+                                                <span className="text-gray-400">-</span>
+                                            )}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-black">
+                                            <span className="px-2 py-1 bg-gray-100 rounded text-xs">
+                                                {getCategoryName(product.category)}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                                            <button
+                                                onClick={() => handleEditProduct(product)}
+                                                className="text-blue-600 hover:text-blue-900"
+                                            >
+                                                Засах
+                                            </button>
                                             <button
                                                 onClick={() => handleDeleteProduct(product.id)}
                                                 className="text-red-600 hover:text-red-900"
@@ -412,8 +569,50 @@ export default function StorePage() {
                     <div className="relative min-h-screen flex items-center justify-center p-4">
                         <div className="relative w-full max-w-md mx-auto bg-white shadow-lg rounded-lg">
                             <div className="p-6">
-                                <h3 className="text-lg font-medium text-gray-900 mb-6 text-center sm:text-left">Шинэ бараа нэмэх</h3>
                                 <form onSubmit={handleAddProduct} className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Ангилал
+                                        </label>
+                                        <select
+                                            value={newProduct.category}
+                                            onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })}
+                                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-black"
+                                        >
+                                            <option value="ready-food">Бэлэн хоол</option>
+                                            <option value="goymon">Гоймон</option>
+                                            <option value="pichen">Пичень</option>
+                                            <option value="chocolate">Шоколад</option>
+                                            <option value="nabor">Набор</option>
+                                            <option value="rezinen-chikher">Резинен чихэр</option>
+                                            <option value="urlen-chikher">Үрлэн чихэр</option>
+                                            <option value="bokh">Бохь</option>
+                                            <option value="choco-paya">Чоко Пая</option>
+                                            <option value="box-pichen">Хайрцаг пичень</option>
+                                            <option value="ishtei-chikher">Иштэй чихэр</option>
+                                            <option value="tos">Тос</option>
+                                            <option value="salad-types">Салад төрөл</option>
+                                            <option value="varen">Варень</option>
+                                            <option value="kg-chikher">Кг чихэр</option>
+                                            <option value="kg-pichen">Кг пичень</option>
+                                            <option value="amtlagch">Амтлагч</option>
+                                            <option value="samryn-types">Самрын төрөл</option>
+                                            <option value="chibs">Чибс</option>
+                                            <option value="sea-buckthorn">Далайн байцаа</option>
+                                            <option value="drinks">Ундаа</option>
+                                            <option value="fish">Загас</option>
+                                            <option value="coffee-tea">Кофе цай</option>
+                                            <option value="tea-idea">Цай идээ</option>
+                                            <option value="yooton">Ёотон</option>
+                                            <option value="celcegnuur">Цэлцэгнүүр</option>
+                                            <option value="rulet">Рулет</option>
+                                            <option value="sok">Сок</option>
+                                            <option value="kompod">Компод</option>
+                                            <option value="salt">Давс</option>
+                                            <option value="small-goods">Жижиглэн бараа</option>
+                                            <option value="german-goods">Герман бараа</option>
+                                        </select>
+                                    </div>
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
                                             Барааны нэр
@@ -430,118 +629,44 @@ export default function StorePage() {
 
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Тоо ширхэг
+                                            Нэг хайрцагт хэдэн ширхэг
                                         </label>
                                         <input
                                             type="number"
                                             required
                                             min="1"
-                                            value={newProduct.quantity || ''}
-                                            onChange={(e) => setNewProduct({ ...newProduct, quantity: parseInt(e.target.value) || 0 })}
+                                            value={newProduct.piecesPerBox || ''}
+                                            onChange={(e) => setNewProduct({ ...newProduct, piecesPerBox: parseInt(e.target.value) || 1 })}
                                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-black"
-                                            placeholder="Тоо ширхэг оруулна уу"
+                                            placeholder="Нэг хайрцагт хэдэн ширхэг"
                                         />
                                     </div>
-
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Борлуулах нэгж
+                                            Хайрцагийн тоо
                                         </label>
-                                        <select
-                                            value={newProduct.unitType}
-                                            onChange={(e) => setNewProduct({ ...newProduct, unitType: e.target.value as 'piece' | 'box' })}
+                                        <input
+                                            type="number"
+                                            required
+                                            min="0"
+                                            value={newProduct.boxQuantity || ''}
+                                            onChange={(e) => {
+                                                const boxQty = parseInt(e.target.value) || 0
+                                                const piecesPerBox = newProduct.piecesPerBox || 1
+                                                const totalPieces = boxQty * piecesPerBox
+                                                setNewProduct({
+                                                    ...newProduct,
+                                                    boxQuantity: boxQty,
+                                                    quantity: totalPieces
+                                                })
+                                            }}
                                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-black"
-                                        >
-                                            <option value="piece">Ширхэгээр</option>
-                                            <option value="box">Хайрцгаар</option>
-                                        </select>
+                                            placeholder="Хайрцагийн тоо оруулна уу"
+                                        />
                                     </div>
-
-                                    {newProduct.unitType === 'box' && (
-                                        <>
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                    Нэг хайрцагт хэдэн ширхэг
-                                                </label>
-                                                <input
-                                                    type="number"
-                                                    required
-                                                    min="1"
-                                                    value={newProduct.piecesPerBox || ''}
-                                                    onChange={(e) => setNewProduct({ ...newProduct, piecesPerBox: parseInt(e.target.value) || 1 })}
-                                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-black"
-                                                    placeholder="Нэг хайрцагт хэдэн ширхэг"
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                    Хайрцагийн тоо
-                                                </label>
-                                                <input
-                                                    type="number"
-                                                    required
-                                                    min="0"
-                                                    value={newProduct.boxQuantity || ''}
-                                                    onChange={(e) => {
-                                                        const boxQty = parseInt(e.target.value) || 0
-                                                        const piecesPerBox = newProduct.piecesPerBox || 1
-                                                        const totalPieces = boxQty * piecesPerBox
-                                                        setNewProduct({
-                                                            ...newProduct,
-                                                            boxQuantity: boxQty,
-                                                            quantity: totalPieces
-                                                        })
-                                                    }}
-                                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-black"
-                                                    placeholder="Хайрцагийн тоо оруулна уу"
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                    Хайрцагийн үнэ (₮)
-                                                </label>
-                                                <input
-                                                    type="number"
-                                                    required
-                                                    min="1"
-                                                    value={newProduct.boxPrice || ''}
-                                                    onChange={(e) => {
-                                                        const boxPrice = parseInt(e.target.value) || 0
-                                                        const piecesPerBox = newProduct.piecesPerBox || 1
-                                                        const piecePrice = piecesPerBox > 0 ? Math.round(boxPrice / piecesPerBox) : 0
-                                                        setNewProduct({
-                                                            ...newProduct,
-                                                            boxPrice: boxPrice,
-                                                            price: piecePrice
-                                                        })
-                                                    }}
-                                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-black"
-                                                    placeholder="Хайрцагийн үнэ оруулна уу"
-                                                />
-                                            </div>
-                                        </>
-                                    )}
-
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Ангилал
-                                        </label>
-                                        <select
-                                            value={newProduct.category}
-                                            onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })}
-                                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-black"
-                                        >
-                                            <option value="general">Ерөнхий</option>
-                                            <option value="drinks">Ундаа</option>
-                                            <option value="food">Хоол</option>
-                                            <option value="dairy">Сүүн бүтээгдэхүүн</option>
-                                            <option value="personal">Хувийн хэрэгцээ</option>
-                                        </select>
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            {newProduct.unitType === 'box' ? 'Ширхэгийн үнэ (автомат тооцох)' : 'Ширхэгийн үнэ'} (₮)
+                                            Нэгжийн үнэ (₮)
                                         </label>
                                         <input
                                             type="number"
@@ -550,8 +675,19 @@ export default function StorePage() {
                                             value={newProduct.price || ''}
                                             onChange={(e) => setNewProduct({ ...newProduct, price: parseInt(e.target.value) || 0 })}
                                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-black"
-                                            placeholder="Ширхэгийн үнэ оруулна уу"
-                                            disabled={newProduct.unitType === 'box'}
+                                            placeholder="Нэгжийн үнэ оруулна уу"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Дуусах хугацаа (сонголттой)
+                                        </label>
+                                        <input
+                                            type="date"
+                                            value={newProduct.expiryDate}
+                                            onChange={(e) => setNewProduct({ ...newProduct, expiryDate: e.target.value })}
+                                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-black"
+                                            placeholder="Дуусах хугацаа"
                                         />
                                     </div>
 
@@ -565,6 +701,160 @@ export default function StorePage() {
                                         <button
                                             type="button"
                                             onClick={() => setShowAddForm(false)}
+                                            className="w-full sm:flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-3 rounded-lg text-base font-medium transition-colors"
+                                        >
+                                            Цуцлах
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Edit Product Modal */}
+            {showEditForm && editingProduct && (
+                <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+                    <div className="relative min-h-screen flex items-center justify-center p-4">
+                        <div className="relative w-full max-w-md mx-auto bg-white shadow-lg rounded-lg">
+                            <div className="p-6">
+                                <h3 className="text-lg font-medium text-gray-900 mb-6 text-center sm:text-left">Бараа засах</h3>
+                                <form onSubmit={handleEditProductSubmit} className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Ангилал
+                                        </label>
+                                        <select
+                                            value={editProduct.category}
+                                            onChange={(e) => setEditProduct({ ...editProduct, category: e.target.value })}
+                                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-black"
+                                        >
+                                            <option value="ready-food">Бэлэн хоол</option>
+                                            <option value="goymon">Гоймон</option>
+                                            <option value="pichen">Пичень</option>
+                                            <option value="chocolate">Шоколад</option>
+                                            <option value="nabor">Набор</option>
+                                            <option value="rezinen-chikher">Резинен чихэр</option>
+                                            <option value="urlen-chikher">Үрлэн чихэр</option>
+                                            <option value="bokh">Бохь</option>
+                                            <option value="choco-paya">Чоко Пая</option>
+                                            <option value="box-pichen">Хайрцаг пичень</option>
+                                            <option value="ishtei-chikher">Иштэй чихэр</option>
+                                            <option value="tos">Тос</option>
+                                            <option value="salad-types">Салад төрөл</option>
+                                            <option value="varen">Варень</option>
+                                            <option value="kg-chikher">Кг чихэр</option>
+                                            <option value="kg-pichen">Кг пичень</option>
+                                            <option value="amtlagch">Амтлагч</option>
+                                            <option value="samryn-types">Самрын төрөл</option>
+                                            <option value="chibs">Чибс</option>
+                                            <option value="sea-buckthorn">Далайн байцаа</option>
+                                            <option value="drinks">Ундаа</option>
+                                            <option value="fish">Загас</option>
+                                            <option value="coffee-tea">Кофе цай</option>
+                                            <option value="tea-idea">Цай идээ</option>
+                                            <option value="yooton">Ёотон</option>
+                                            <option value="celcegnuur">Цэлцэгнүүр</option>
+                                            <option value="rulet">Рулет</option>
+                                            <option value="sok">Сок</option>
+                                            <option value="kompod">Компод</option>
+                                            <option value="salt">Давс</option>
+                                            <option value="small-goods">Жижиглэн бараа</option>
+                                            <option value="german-goods">Герман бараа</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Барааны нэр
+                                        </label>
+                                        <input
+                                            type="text"
+                                            required
+                                            value={editProduct.name}
+                                            onChange={(e) => setEditProduct({ ...editProduct, name: e.target.value })}
+                                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-black placeholder-black"
+                                            placeholder="Барааны нэрийг оруулна уу"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Нэг хайрцагт хэдэн ширхэг
+                                        </label>
+                                        <input
+                                            type="number"
+                                            required
+                                            min="1"
+                                            value={editProduct.piecesPerBox || ''}
+                                            onChange={(e) => setEditProduct({ ...editProduct, piecesPerBox: parseInt(e.target.value) || 1 })}
+                                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-black"
+                                            placeholder="Нэг хайрцагт хэдэн ширхэг"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Хайрцагийн тоо
+                                        </label>
+                                        <input
+                                            type="number"
+                                            required
+                                            min="0"
+                                            value={editProduct.boxQuantity || ''}
+                                            onChange={(e) => {
+                                                const boxQty = parseInt(e.target.value) || 0
+                                                const piecesPerBox = editProduct.piecesPerBox || 1
+                                                const totalPieces = boxQty * piecesPerBox
+                                                setEditProduct({
+                                                    ...editProduct,
+                                                    boxQuantity: boxQty,
+                                                    quantity: totalPieces
+                                                })
+                                            }}
+                                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-black"
+                                            placeholder="Хайрцагийн тоо оруулна уу"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Нэгжийн үнэ (₮)
+                                        </label>
+                                        <input
+                                            type="number"
+                                            required
+                                            min="1"
+                                            value={editProduct.price || ''}
+                                            onChange={(e) => setEditProduct({ ...editProduct, price: parseInt(e.target.value) || 0 })}
+                                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-black"
+                                            placeholder="Нэгжийн үнэ оруулна уу"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Дуусах хугацаа (сонголттой)
+                                        </label>
+                                        <input
+                                            type="date"
+                                            value={editProduct.expiryDate}
+                                            onChange={(e) => setEditProduct({ ...editProduct, expiryDate: e.target.value })}
+                                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-black"
+                                            placeholder="Дуусах хугацаа"
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col sm:flex-row gap-3 mt-6">
+                                        <button
+                                            type="submit"
+                                            className="w-full sm:flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg text-base font-medium transition-colors"
+                                        >
+                                            Хадгалах
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setShowEditForm(false)
+                                                setEditingProduct(null)
+                                            }}
                                             className="w-full sm:flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-3 rounded-lg text-base font-medium transition-colors"
                                         >
                                             Цуцлах
