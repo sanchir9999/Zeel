@@ -780,7 +780,7 @@ export default function StorePage() {
 
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Хайрцагийн тоо
+                                            Нийт хайрцагийн тоо
                                         </label>
                                         <input
                                             type="number"
@@ -803,7 +803,7 @@ export default function StorePage() {
                                     </div>
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Нэг хайрцагт хэдэн ширхэг
+                                            Нэг хайрцагт
                                         </label>
                                         <input
                                             type="number"
