@@ -780,20 +780,6 @@ export default function StorePage() {
 
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Нэг хайрцагт хэдэн ширхэг
-                                        </label>
-                                        <input
-                                            type="number"
-                                            required
-                                            min="1"
-                                            value={editProduct.piecesPerBox || ''}
-                                            onChange={(e) => setEditProduct({ ...editProduct, piecesPerBox: parseInt(e.target.value) || 1 })}
-                                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-black"
-                                            placeholder="Нэг хайрцагт хэдэн ширхэг"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
                                             Хайрцагийн тоо
                                         </label>
                                         <input
@@ -813,6 +799,20 @@ export default function StorePage() {
                                             }}
                                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-black"
                                             placeholder="Хайрцагийн тоо оруулна уу"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Нэг хайрцагт хэдэн ширхэг
+                                        </label>
+                                        <input
+                                            type="number"
+                                            required
+                                            min="1"
+                                            value={editProduct.piecesPerBox || ''}
+                                            onChange={(e) => setEditProduct({ ...editProduct, piecesPerBox: parseInt(e.target.value) || 1 })}
+                                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-black"
+                                            placeholder="Нэг хайрцагт хэдэн ширхэг"
                                         />
                                     </div>
                                     <div>
